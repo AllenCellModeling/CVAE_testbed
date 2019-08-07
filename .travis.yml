@@ -26,5 +26,5 @@ deploy:
     secure: PLEASE_REPLACE_ME
   on:
     tags: true
-    repo: ritvikvasan/Gaussian_CVAE
+    repo: AllenCellModeling/Gaussian_CVAE
     python: 3.7

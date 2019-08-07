@@ -1,5 +1,5 @@
 cd ..
-python ~/Github/Fully_factorizable_CVAE/main_train.py \
+python ~/Github/cookiecutter/Gaussian_CVAE/Gaussian_CVAE/main_train.py \
 	--gpu_id 0 \
 	--path_save_dir ./outputs/baseline_results/ \
 	--model_fn models.CVAE_baseline.CVAE \

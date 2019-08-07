@@ -11,12 +11,12 @@ def run_synthetic(args, all_input_train, all_mask_train, all_input_test, all_mas
     conds = []
 
     for j in range(model_kwargs['x_dim'] + 1):
-        # print(conds)
-        # print('new')
+        print('Number of conditions', model_kwargs['x_dim']-len(conds))
         for i in range(n_epochs):
-            # print(i)
+            print('Training')
             train_loss, train_rcl, train_kld = train(args, i, loss_fn, all_input_train,  all_mask_train, 
-                                                    batch_size, model, optimizer, gpu_id,  [], model_kwargs)
+                                                    batch_size, model, optimizer, gpu_id,  conds, model_kwargs)
+            print('Testing')
             test_loss, test_rcl, test_kld = test(args, i, loss_fn, all_input_test, all_mask_test, 
                                                     batch_size, model, optimizer, gpu_id, conds, model_kwargs)
             # print(test_loss)
@@ -39,6 +39,17 @@ def train(args, epoch, loss_fn, all_input_train, all_mask_train, batch_size, mod
         optimizer.zero_grad()
         c, d = all_input_train[j], all_mask_train[j]
 
+        if args.dataloader != 'datasets.dataloader.make_synthetic_data_3': 
+            # print(args.dataloader)
+            if len(conds) > 0:
+                tmp1, tmp2 = torch.split(d, 2, dim=1)
+                for kk in conds:
+                    tmp1[:, kk], tmp2[:, kk] = 0, 0
+                d = torch.cat((tmp1, tmp2), 1)
+        else:
+            for kk in conds:
+                d[:, kk] =0
+
         recon_batch, mu, log_var = model(c.cuda(gpu_id), d.cuda(gpu_id))
         # recon_batch = recon_batch.view(-1, model_kwargs['x_dim']*2)
         # print(c.size(), recon_batch.size())
@@ -50,9 +61,9 @@ def train(args, epoch, loss_fn, all_input_train, all_mask_train, batch_size, mod
         kld_loss += kld.item()
         optimizer.step()   
     num_batches = len(all_input_train)    
-    # print('====> Epoch: {} Train loss: {:.4f}'.format(epoch, train_loss/num_batches))
-    # print('====> Epoch: {} RCL loss: {:.4f}'.format(epoch, rcl_loss/num_batches))
-    # print('====> Epoch: {} KLD loss: {:.4f}'.format(epoch, kld_loss/num_batches))
+    print('====> Epoch: {} Train loss: {:.4f}'.format(epoch, train_loss/num_batches))
+    print('====> Train RCL loss: {:.4f}'.format(rcl_loss/num_batches))
+    print('====> Train KLD loss: {:.4f}'.format(kld_loss/num_batches))
     return train_loss/num_batches, rcl_loss/num_batches, kld_loss/num_batches
 
 def test(args, epoch, loss_fn, all_input_test, all_mask_test, batch_size, model, optimizer, gpu_id, conds, model_kwargs):
@@ -82,8 +93,8 @@ def test(args, epoch, loss_fn, all_input_test, all_mask_test, batch_size, model,
             kld_loss += kld.item()
     num_batches = len(all_input_test)
     # print('loss function', args.loss_fn)
-    # print('====> Epoch: {} Test losses loss: {:.4f}'.format(epoch, test_loss/num_batches))
-    print('====> Epoch: {} RCL loss: {:.4f}'.format(epoch, rcl_loss/num_batches))
-    print('====> Epoch: {} KLD loss: {:.4f}'.format(epoch, kld_loss/num_batches))
+    print('====> Epoch: {} Test losses: {:.4f}'.format(epoch, test_loss/num_batches))
+    print('====> RCL loss: {:.4f}'.format( rcl_loss/num_batches))
+    print('====> KLD loss: {:.4f}'.format( kld_loss/num_batches))
     return test_loss/num_batches, rcl_loss/num_batches, kld_loss/num_batches
 
