@@ -2,11 +2,6 @@
 CVAE_research_testbed
 =====================
 
-
-.. image:: https://img.shields.io/pypi/v/Gaussian_CVAE.svg
-        :target: https://pypi.python.org/pypi/Gaussian_CVAE
-        :alt: Release Status
-
 .. image:: https://travis-ci.com/ritvikvasan/Gaussian_CVAE.svg?branch=master
         :target: https://travis-ci.com/ritvikvasan/Gaussian_CVAE
         :alt: Build Status
@@ -28,8 +23,38 @@ A research testbed on conditional variational autoencoders using Gaussian distri
 * Documentation: https://Gaussian-CVAE.readthedocs.io.
 
 
-Features
+Example run
 --------
+
+* Create conda environment
+
+.. code-block:: bash
+
+    $ conda create --name cvae python=3.7
+
+* Activate conda environment :
+
+.. code-block:: bash
+
+    $ conda activate cvae
+
+* Install requirments in setup.py
+
+.. code-block:: bash
+
+    $ pip install -e .[all]
+
+* Run baseline model
+
+.. code-block:: bash
+
+    $ cd scripts
+
+.. code-block:: bash
+
+    $ ./baseline.sh
+
+* View results in outputs/baseline_results folder. Run compare_models.py to compare results across output folders
 
 * TODO
 
