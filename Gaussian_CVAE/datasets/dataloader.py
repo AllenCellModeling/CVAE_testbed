@@ -29,13 +29,8 @@ def load_mnist_data(BATCH_SIZE, model_kwargs):
 
 def initialize_synthetic_data(BATCH_SIZE, model_kwargs):
 
-    m = MultivariateNormal(torch.zeros(model_kwargs['x_dim']), torch.eye(model_kwargs['x_dim']) 
-                            + torch.FloatTensor([[0, 0.5], [0.5, 0]]))
+    m = MultivariateNormal(torch.zeros(model_kwargs['x_dim']), torch.eye(model_kwargs['x_dim']))
     input_data = m.sample((BATCH_SIZE,))
-    # input_data = torch.empty(0)
-
-    # for i in range(BATCH_SIZE):
-    #     input_data = torch.cat([m.sample().view(1, -1), input_data], 0)
     return input_data
 
 def make_subset_0(row, n_cols):

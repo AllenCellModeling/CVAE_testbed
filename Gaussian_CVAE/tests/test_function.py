@@ -11,15 +11,12 @@ Docs: https://docs.pytest.org/en/latest/
       https://docs.pytest.org/en/latest/goodpractices.html#conventions-for-python-test-discovery
 """
 
-from Gaussian_CVAE import Example
+from Gaussian_CVAE.datasets.dataloader import make_synthetic_data
 
 
-def test_value_change():
-    """An example of a simple function based test"""
-    start_val = 5
-    new_val = 20
-    #
-    example = Example(start_val)
-    example.update_value(new_val)
-    assert (example.get_value() == new_val and
-            example.get_previous_value() == start_val)
+def test_make_synthetic_data():
+    """Make some synthetic data"""
+    model_kwargs = {'x_dim': 2}
+    X, C = make_synthetic_data(2, 10, [], model_kwargs)
+    assert (X.size() == C.size())
+    assert (X.size()[-1] == model_kwargs['x_dim']*2)
