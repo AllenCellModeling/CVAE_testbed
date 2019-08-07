@@ -30,8 +30,6 @@ MarkupSafe==1.1.1
 matplotlib==3.1.0
 mccabe==0.6.1
 mistune==0.8.4
-mkl-fft==1.0.12
-mkl-random==1.0.2
 nbconvert==5.5.0
 nbformat==4.4.0
 notebook==5.7.8
@@ -76,3 +74,4 @@ webencodings==0.5.1
 Werkzeug==0.15.5
 widgetsnbextension==3.5.0
 wrapt==1.11.2
+sphinx_rtd_theme==0.4.3

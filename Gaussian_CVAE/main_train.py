@@ -7,6 +7,8 @@ import time
 import pathlib
 from pathlib import Path
 import datetime
+import matplotlib.pyplot as plt
+import mpl_toolkits
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from torch import nn
@@ -18,7 +20,7 @@ from typing import Optional, Dict
 from run_models.run_test_train import run_test_train
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+
 import seaborn as sns
 
 LOGGER = logging.getLogger(__name__)
