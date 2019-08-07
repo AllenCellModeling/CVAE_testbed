@@ -54,9 +54,9 @@ Example run
 
     $ ./baseline.sh
 
-* View results in outputs/baseline_results folder. Run compare_models.py to compare results across output folders
+* View results in outputs/baseline_results folder. 
 
-* TODO
+* Run compare_models.py to compare results across output folders
 
 Support
 -------
