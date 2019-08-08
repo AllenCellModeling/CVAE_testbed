@@ -14,7 +14,7 @@ def synthetic_loss(x, reconstructed_x, mean, log_var):
     MSE loss for reconstruction, KLD loss as per VAE. Also want to output dimension (element) wise RCL and KLD
     """
 
-    loss = torch.nn.MSELoss(size_average=False)
+    loss = torch.nn.MSELoss(size_average=True)
     loss_per_element = torch.nn.MSELoss(size_average=False, reduce = False)
 
     RCL = loss(reconstructed_x, x)

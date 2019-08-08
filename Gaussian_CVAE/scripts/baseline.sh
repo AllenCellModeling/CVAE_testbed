@@ -5,7 +5,7 @@ python ~/Github/cookiecutter/Gaussian_CVAE/Gaussian_CVAE/main_train.py \
 	--model_fn models.CVAE_baseline.CVAE \
     --model_kwargs baseline_kwargs.json \
 	--batch_size 50  \
-    --n_epochs 30 \
+    --n_epochs 50 \
     --data_type 'synthetic' \
     --dataloader 'datasets.dataloader.make_synthetic_data' \
     --loss_fn 'losses.ELBO.synthetic_loss' \

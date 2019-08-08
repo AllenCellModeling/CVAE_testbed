@@ -68,7 +68,7 @@ def make_condition(input_data, cols):
     input_data = torch.cat((input_data, encoded), 1)
     return input_data
 
-def make_synthetic_data(num_batches, BATCH_SIZE, model_kwargs):
+def make_synthetic_data(num_batches, BATCH_SIZE, model_kwargs, shuffle=True):
 
     Batches_X, Batches_C, Batches_conds = torch.empty([0]) ,torch.empty([0]), torch.empty([0])
 
@@ -78,9 +78,12 @@ def make_synthetic_data(num_batches, BATCH_SIZE, model_kwargs):
 
         C = X.clone()
 
-        C_mask = torch.zeros(C.shape).bernoulli_(0.5)
+        if shuffle is True:
+            C_mask = torch.zeros(C.shape).bernoulli_(0.5)
+        else:
+            C_mask = torch.zeros(C.shape).bernoulli_(0)
 
-        C[C_mask.long()] = 0
+        C[C_mask.byte()] = 0
         C_indicator = C_mask == 0
 
         C = torch.cat([C.float(), C_indicator.float()], 1)
