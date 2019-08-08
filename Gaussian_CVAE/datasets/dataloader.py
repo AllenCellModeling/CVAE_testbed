@@ -29,8 +29,7 @@ def load_mnist_data(BATCH_SIZE, model_kwargs):
 
 def initialize_synthetic_data(BATCH_SIZE, model_kwargs):
 
-    m = MultivariateNormal(torch.zeros(model_kwargs['x_dim']), torch.eye(model_kwargs['x_dim']))
-    input_data = m.sample((BATCH_SIZE,))
+
     return input_data
 
 def make_subset_0(row, n_cols):
@@ -59,27 +58,88 @@ def make_batch_0(rows, n_col):
 def make_condition(input_data, cols):
 
     encoded = torch.ones(input_data.size())
-    if len(cols) > 0:
-        for j in range(input_data.size()[1]):
-            if j in cols:
-                input_data[:, j] = 0
-                encoded[:, j] = 0
+    encoded[:, cols] = 0
+    input_data[:, cols] = 0
+    # if len(cols) > 0:
+    #     for j in range(input_data.size()[1]):
+    #         if j in cols:
+    #             input_data[:, j] = 0
+    #             encoded[:, j] = 0
     input_data = torch.cat((input_data, encoded), 1)
     return input_data
 
-def make_synthetic_data(num_batches, BATCH_SIZE, conds, model_kwargs):
-    all_input, all_mask = torch.empty([0]), torch.empty([0])
-    for i in range(num_batches):
-        input_data = initialize_synthetic_data(BATCH_SIZE, model_kwargs)
-        a, b = make_batch_0(input_data, 0)
-        c = torch.cat((a, b), 1)
-        d = make_condition(input_data, conds)
-        c = c.view([1, -1, model_kwargs['x_dim']*2])
-        d = d.view([1, -1, model_kwargs['x_dim']*2])
-        all_input = torch.cat((all_input, c), 0)
-        all_mask = torch.cat((all_mask, d), 0)
+def make_synthetic_data(num_batches, BATCH_SIZE, model_kwargs):
 
-    return all_input, all_mask
+    Batches_X, Batches_C, Batches_conds = torch.empty([0]) ,torch.empty([0]), torch.empty([0])
+
+    for i in range(num_batches):
+        m = MultivariateNormal(torch.zeros(model_kwargs['x_dim']), torch.eye(model_kwargs['x_dim']))
+        X = m.sample((BATCH_SIZE,))
+
+        C = X.clone()
+
+        C_mask = torch.zeros(C.shape).bernoulli_(0.5)
+
+        C[C_mask.long()] = 0
+        C_indicator = C_mask == 0
+
+        C = torch.cat([C.float(), C_indicator.float()], 1)
+        X = X.view([1, -1, model_kwargs['x_dim']])
+        C = C.view([1, -1, model_kwargs['x_dim']*2])
+
+        # Sum up
+        conds = C[:,:,model_kwargs['x_dim']:].sum(2)
+
+        Batches_X = torch.cat([Batches_X, X], 0)
+        Batches_C = torch.cat([Batches_C, C], 0)
+        Batches_conds = torch.cat([Batches_conds, conds], 0)
+    
+
+    # all_input, all_mask = torch.empty([0]), torch.empty([0])
+    # for i in range(num_batches):
+    #     input_data = initialize_synthetic_data(BATCH_SIZE, model_kwargs)
+    #     a, b = make_batch_0(input_data, 0)
+    #     c = torch.cat((a, b), 1)
+    #     if train is False:
+    #         d = make_condition(input_data, conds)
+    #     else:
+    #         splits = [0]
+    #         dd = []
+    #         conds = []
+    #         for j in range(model_kwargs['x_dim']+1):
+
+    #             input_tmp = []
+    #             if j != model_kwargs['x_dim']:
+    #                 splits.append(torch.randint(splits[j], BATCH_SIZE, (1,)).item())
+    #                 input_tmp = input_data[splits[j]:splits[j+1], :]
+    #             else:
+    #                 input_tmp = input_data[splits[j]:BATCH_SIZE, :]
+
+        
+    #             if len(conds) != model_kwargs['x_dim'] and len(conds) != 0:
+    #                 new_conds = torch.randint(0, model_kwargs['x_dim'] + 1, (model_kwargs['x_dim'],))
+    #                 new_conds = [i.item() for i in new_conds]
+    #                 while len(set(new_conds)) != len(new_conds):
+    #                     new_conds = torch.randint(0, model_kwargs['x_dim'] + 1, (model_kwargs['x_dim'],))
+    #                     new_conds = [i.item() for i in new_conds]
+    #                 tmp_dd = make_condition(input_tmp, new_conds)
+                        
+    #             else:
+    #                 tmp_dd = make_condition(input_tmp, conds)
+
+    #             dd.append(tmp_dd)
+    #             conds.append(j)
+
+    #         d = torch.empty([0])
+    #         for k in dd:
+    #             d = torch.cat((d, k), 0)
+            
+    #     c = c.view([1, -1, model_kwargs['x_dim']*2])
+    #     d = d.view([1, -1, model_kwargs['x_dim']*2])
+    #     all_input = torch.cat((all_input, c), 0)
+    #     all_mask = torch.cat((all_mask, d), 0)
+
+    return Batches_X, Batches_C, Batches_conds
 
 def make_synthetic_data_2(num_batches, BATCH_SIZE, conds, model_kwargs):
     all_input, all_mask = torch.empty([0]), torch.empty([0])

@@ -2,7 +2,7 @@
 CVAE_research_testbed
 =====================
 
-.. image:: https://travis-ci.com/ritvikvasan/Gaussian_CVAE.svg?branch=master
+.. image:: https://travis-ci.com/AllenCellModeling/Gaussian_CVAE.svg?branch=master
         :target: https://travis-ci.com/AllenCellModeling/Gaussian_CVAE
         :alt: Build Status
 
@@ -10,7 +10,7 @@ CVAE_research_testbed
         :target: https://Gaussian-CVAE.readthedocs.io/en/latest
         :alt: Documentation Status
 
-.. image:: https://codecov.io/gh/ritvikvasan/Gaussian_CVAE/branch/master/graph/badge.svg
+.. image:: https://codecov.io/gh/AllenCellModeling/Gaussian_CVAE/branch/master/graph/badge.svg
         :target: https://codecov.io/gh/AllenCellModeling/Gaussian_CVAE
         :alt: Codecov Status
 
