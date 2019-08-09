@@ -2,8 +2,8 @@
 CVAE_research_testbed
 =====================
 
-.. image:: https://travis-ci.com/AllenCellModeling/Gaussian_CVAE.svg?branch=master
-        :target: https://travis-ci.com/AllenCellModeling/Gaussian_CVAE
+.. image:: https://travis-ci.org/AllenCellModeling/Gaussian_CVAE.svg?branch=master
+        :target: https://travis-ci.org/AllenCellModeling/Gaussian_CVAE
         :alt: Build Status
 
 .. image:: https://readthedocs.org/projects/Gaussian-CVAE/badge/?version=latest
