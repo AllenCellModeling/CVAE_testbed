@@ -17,6 +17,6 @@ from Gaussian_CVAE.datasets.dataloader import make_synthetic_data
 def test_make_synthetic_data():
     """Make some synthetic data"""
     model_kwargs = {'x_dim': 2}
-    X, C = make_synthetic_data(2, 10, [], model_kwargs)
-    assert (X.size() == C.size())
-    assert (X.size()[-1] == model_kwargs['x_dim']*2)
+    X, C, ind = make_synthetic_data(2, 10, model_kwargs, shuffle = True)
+    assert (X.size()[-1]*2 == C.size()[-1])
+    assert (X.size()[-1] == model_kwargs['x_dim'])
