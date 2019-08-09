@@ -77,11 +77,15 @@ def make_synthetic_data(num_batches, BATCH_SIZE, model_kwargs, shuffle=True):
         X = m.sample((BATCH_SIZE,))
 
         C = X.clone()
-
+        count = 0
         if shuffle is True:
-            C_mask = torch.zeros(C.shape).bernoulli_(0.5)
+            while count == 0:
+                C_mask = torch.zeros(C.shape).bernoulli_(0.5)
+                if len(set([i.item() for i in torch.sum(C_mask, dim = 1)])) == model_kwargs['x_dim'] + 1:
+                    count = 1 
         else:
             C_mask = torch.zeros(C.shape).bernoulli_(0)
+        print(len(set([i.item() for i in torch.sum(C_mask, dim = 1)])))
 
         C[C_mask.byte()] = 0
         C_indicator = C_mask == 0

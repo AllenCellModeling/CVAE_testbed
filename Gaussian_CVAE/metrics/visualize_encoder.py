@@ -40,7 +40,7 @@ def visualize_encoder_synthetic(args, model, conds, kl_per_lt=None):
             # print(total_loss.item(), rcl.item(), kl_per_lt_temp.item())
             all_kl = np.append(all_kl, kl_per_lt_temp.item())
             all_lt.append(ii)
-            kl_per_lt['num_conds'].append(len(conds))
+            kl_per_lt['num_conds'].append(args.model_kwargs['x_dim'] - len(conds))
             kl_per_lt['latent_dim'].append(ii)
             kl_per_lt['kl_divergence'].append(kl_per_lt_temp.item())
         all_kl, all_lt = list(zip(*sorted(zip(all_kl, all_lt))))

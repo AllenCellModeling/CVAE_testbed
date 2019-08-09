@@ -190,10 +190,10 @@ def make_plot_encoding(args: argparse.Namespace, model) -> None:
         # print(conds, i)
         if i == 0:
             z_means_x, z_means_y, kl_per_lt, z_var_x, z_var_y = vis_enc(args, model, conds, kl_per_lt=None)
-            ax.scatter(z_means_x, z_means_y, marker='.', s = 30, label = str(len(conds)))
+            ax.scatter(z_means_x, z_means_y, marker='.', s = 30, label = str(args.model_kwargs['x_dim'] - len(conds)))
         else:
             z_means_x, z_means_y, kl_per_lt, z_var_x, z_var_y = vis_enc(args, model, conds, kl_per_lt)
-            ax.scatter(z_means_x, z_means_y, marker='.', s = 30, label = str(len(conds)))
+            ax.scatter(z_means_x, z_means_y, marker='.', s = 30, label = str(args.model_kwargs['x_dim'] - len(conds)))
         try:
             conds.pop()
         except:
@@ -222,7 +222,7 @@ def make_plot_encoding(args: argparse.Namespace, model) -> None:
         tmp = tmp.sort_values(by = 'kl_divergence',  ascending = False)
         tmp = tmp.reset_index(drop=True)
         # print(tmp)
-        sns.lineplot(ax = ax2, data=tmp, x=tmp.index,y='kl_divergence', label = str(args.model_kwargs['x_dim'] - i))
+        sns.lineplot(ax = ax2, data=tmp, x=tmp.index,y='kl_divergence', label = str(i))
     ax2.set_xlabel('Latent dimension')
     ax2.set_ylabel('KLD')
         # fig4, ax4 = plt.subplots(figsize=(6.5,5))
@@ -301,7 +301,7 @@ def make_plot(df: pd.DataFrame, df2: pd.DataFrame, path_save_dir: Path, args: ar
 
     # print(df)
     if 'test_rcl' in df.columns:
-        sns.lineplot(ax = ax, data = df, x = 'test_rcl', y= 'test_kld', hue = 'num_conds')
+        sns.lineplot(ax = ax, data = df, x = 'test_rcl', y= 'test_kld', hue = 'num_conds', legend = 'full')
         # for i in range(len(set(df['num_conds']))):
         #     tmp = df.loc[df['num_conds'] == i]
         #     print('minimum RCL', np.sort(tmp['test_rcl'])[0])
@@ -313,7 +313,7 @@ def make_plot(df: pd.DataFrame, df2: pd.DataFrame, path_save_dir: Path, args: ar
 
     fig, ax = plt.subplots(figsize=(6.5,5))
     if 'test_kld_per_dim' in df2.columns:
-        sns.lineplot(ax = ax, data = df2, x = 'dimension', y= 'test_kld_per_dim', hue = 'num_conds')
+        sns.lineplot(ax = ax, data = df2, x = 'dimension', y= 'test_kld_per_dim', hue = 'num_conds', legend = 'full')
         # for i in range(len(set(df['num_conds']))):
         #     tmp = df.loc[df['num_conds'] == i]
         #     print('minimum RCL', np.sort(tmp['test_rcl'])[0])
