@@ -18,11 +18,12 @@ def visualize_encoder_synthetic(args, model, conds, kl_per_lt=None):
         all_kl, all_lt = [], []
         make_data = str_to_object(args.dataloader)
 
-        c, d, ind = make_data(1, args.batch_size, args.model_kwargs, shuffle = False)
+
+        c, d, ind = make_data(1, args.batch_size*4, args.model_kwargs, shuffle = False)
         c = c[0, :]
         d = d[0, :]
 
-        tmp1, tmp2 = torch.split(d, 2, dim=1)
+        tmp1, tmp2 = torch.split(d, args.model_kwargs['x_dim'], dim=1)
         for kk in conds:
             tmp1[:, kk], tmp2[:, kk] = 0, 0
         d = torch.cat((tmp1, tmp2), 1)
