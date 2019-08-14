@@ -1,6 +1,6 @@
 import torch
 import pandas as pd
-from main_train import str_to_object
+from Gaussian_CVAE.main_train import str_to_object
 
 def run_synthetic(args, X_train, C_train, Cond_indices_train, X_test, C_test, Cond_indices_test, 
                     n_epochs, loss_fn, model, optimizer, batch_size, gpu_id, model_kwargs): 

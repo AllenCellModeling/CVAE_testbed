@@ -1,5 +1,5 @@
-Welcome to CVAE_research_testbed's documentation!
-======================================
+Welcome to Gaussian CVAE's documentation!
+=============================================================
 
 .. toctree::
    :maxdepth: 2

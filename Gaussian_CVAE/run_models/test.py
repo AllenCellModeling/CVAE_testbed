@@ -1,11 +1,11 @@
 import sys
 # sys.path.insert(0, '../losses/')
-from losses.ELBO import calculate_loss
+from Gaussian_CVAE.losses.ELBO import calculate_loss
 # sys.path.insert(0, '../models/')
-from models.sample import Sample
+from Gaussian_CVAE.models.sample import Sample
 import torch
 # sys.path.insert(0, '../metrics/')
-from metrics.blur import calc_blur
+from Gaussian_CVAE.metrics.blur import calc_blur
 
 
 def test(model, optimizer, test_iterator, device, BATCH_SIZE):

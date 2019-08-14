@@ -1,7 +1,7 @@
-from run_models.train import train
-from run_models.test import test
+from Gaussian_CVAE.run_models.train import train
+from Gaussian_CVAE.run_models.test import test
 import torch
-from run_models.generative_metric import compute_generative_metric
+from Gaussian_CVAE.run_models.generative_metric import compute_generative_metric
 import pandas as pd
 import numpy as np
 

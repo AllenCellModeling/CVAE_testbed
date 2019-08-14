@@ -1,8 +1,8 @@
 import sys
 # sys.path.insert(0, '../losses/')
-from losses.ELBO import calculate_loss
+from Gaussian_CVAE.losses.ELBO import calculate_loss
 # sys.path.insert(0, '../models/')
-from models.sample import Sample
+from Gaussian_CVAE.models.sample import Sample
 
 def train(model, optimizer, train_iterator, device, BATCH_SIZE):
     model.train()

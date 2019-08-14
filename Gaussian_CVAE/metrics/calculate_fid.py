@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from metrics.inception import InceptionV3
+from Gaussian_CVAE.metrics.inception import InceptionV3
 from scipy import linalg
 from torch.nn.functional import adaptive_avg_pool2d
 from torch.autograd import Variable

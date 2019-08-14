@@ -17,7 +17,6 @@ from torch.utils.data import DataLoader
 import torch
 from torchvision import transforms
 from typing import Optional, Dict
-from run_models.run_test_train import run_test_train
 import pandas as pd
 import numpy as np
 

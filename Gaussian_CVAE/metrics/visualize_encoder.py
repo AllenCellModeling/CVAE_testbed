@@ -1,8 +1,8 @@
 import torch
 import numpy as np
-from losses.ELBO import synthetic_loss
+from Gaussian_CVAE.losses.ELBO import synthetic_loss
 import pandas as pd
-from main_train import str_to_object
+from Gaussian_CVAE.main_train import str_to_object
 
 def visualize_encoder_synthetic(args, model, conds, kl_per_lt=None):
 
