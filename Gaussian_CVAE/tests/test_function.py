@@ -11,12 +11,21 @@ Docs: https://docs.pytest.org/en/latest/
       https://docs.pytest.org/en/latest/goodpractices.html#conventions-for-python-test-discovery
 """
 
-from Gaussian_CVAE.datasets.dataloader import make_synthetic_data
+from Gaussian_CVAE.datasets.synthetic import SyntheticDataset
+import subprocess
+import os
 
-
-def test_make_synthetic_data():
-    """Make some synthetic data"""
+def test_synthetic_data():
+    """Test synthetic data size"""
     model_kwargs = {'x_dim': 2}
-    X, C, ind = make_synthetic_data(2, 10, model_kwargs, shuffle = True)
+    X, C, ind = SyntheticDataset(2, 10, model_kwargs, shuffle = True).get_all_items()
     assert (X.size()[-1]*2 == C.size()[-1])
     assert (X.size()[-1] == model_kwargs['x_dim'])
+
+def test_run():
+    """
+    Test that synthetic data can pass through network
+    """
+    subprocess.call(['./example.sh'])
+    # os.system("sh example.sh")
+

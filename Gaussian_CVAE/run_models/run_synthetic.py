@@ -1,6 +1,5 @@
 import torch
 import pandas as pd
-from datasets.dataloader import make_synthetic_data
 from main_train import str_to_object
 
 def run_synthetic(args, X_train, C_train, Cond_indices_train, X_test, C_test, Cond_indices_test, 
@@ -144,7 +143,6 @@ def test(args, epoch, loss_fn, X_test, C_test,Cond_indices_test, batch_size, mod
 
                 this_cond_positions = cond_labels == ii
                 if len(torch.unique(cond_labels)) == args.model_kwargs['x_dim'] + 1:
-                    print('DO I COME HERR', len(torch.unique(cond_labels)),args.model_kwargs['x_dim'] + 1)
                     batch_rcl = torch.cat([batch_rcl.cuda(gpu_id), torch.sum(rcl_per_element[this_cond_positions], dim = 0).view(1, -1)], 0)
                     batch_kld = torch.cat([batch_kld.cuda(gpu_id), torch.sum(kld_per_element[this_cond_positions], dim = 0).view(1, -1)], 0)
                     batch_length += 1
@@ -153,7 +151,6 @@ def test(args, epoch, loss_fn, X_test, C_test,Cond_indices_test, batch_size, mod
                 this_cond_kld = torch.sum(kld_per_element[this_cond_positions])
                 rcl_per_condition_loss[jj] += this_cond_rcl.item()
                 kld_per_condition_loss[jj] += this_cond_kld.item()
-            print(batch_rcl.size())
 
     num_batches = len(X_test)
     # print(batch_kld.size(), 'test')

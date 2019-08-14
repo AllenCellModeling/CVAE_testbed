@@ -139,8 +139,8 @@ def train_model():
         train_iterator, test_iterator = load_data(args.batch_size, args.model_kwargs)
     elif args.data_type == 'synthetic':
         load_data = str_to_object(args.dataloader)
-        X_train, C_train, Cond_indices_train = load_data(1000, args.batch_size, args.model_kwargs)
-        X_test, C_test, Cond_indices_test = load_data(1000, args.batch_size, args.model_kwargs)
+        X_train, C_train, Cond_indices_train = load_data(1000, args.batch_size, args.model_kwargs, corr=True).get_all_items()
+        X_test, C_test, Cond_indices_test = load_data(1000, args.batch_size, args.model_kwargs, corr=True).get_all_items()
     # print(args.model_fn)
 
     model = get_model(args.model_fn, args.model_kwargs).to(device)

@@ -2,7 +2,6 @@ import torch
 import numpy as np
 from losses.ELBO import synthetic_loss
 import pandas as pd
-from datasets.dataloader import make_synthetic_data
 from main_train import str_to_object
 
 def visualize_encoder_synthetic(args, model, conds, kl_per_lt=None):
@@ -19,7 +18,7 @@ def visualize_encoder_synthetic(args, model, conds, kl_per_lt=None):
         make_data = str_to_object(args.dataloader)
 
 
-        c, d, ind = make_data(1, args.batch_size*4, args.model_kwargs, shuffle = False)
+        c, d, ind = make_data(1, args.batch_size*4, args.model_kwargs, shuffle = False).get_all_items()
         c = c[0, :]
         d = d[0, :]
 
