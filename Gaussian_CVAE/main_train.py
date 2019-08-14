@@ -19,6 +19,7 @@ from torchvision import transforms
 from typing import Optional, Dict
 import pandas as pd
 import numpy as np
+from Gaussian_CVAE.models.model_loader import ModelLoader
 
 import seaborn as sns
 
@@ -69,17 +70,6 @@ def save_args(args: argparse.Namespace, path_json: Optional[Path] = None) -> Non
     with path_json.open('w') as fo:
         json.dump(vars(args), fo, indent=4)
     LOGGER.info(f'Saved: {path_json}')
-
-def save_model(model: nn.Module, path_save_dir: Path) -> None:
-    """Saves model weights and metadata in specified directory."""
-
-    path_save_dir.mkdir(parents=True, exist_ok=True)
-    path_weights = path_save_dir / Path('weights.pt')
-    device = next(model.parameters()).device  # Get device from first param
-    model.to(torch.device('cpu'))
-    torch.save(model.state_dict(), path_weights)
-    LOGGER.info(f'Saved model weights: {path_weights}')
-    model.to(device)
 
 def get_model(model_fn, model_kwargs: Optional[Dict] = None) -> nn.Module:
     model_fn = str_to_object(model_fn)
@@ -138,8 +128,8 @@ def train_model():
         train_iterator, test_iterator = load_data(args.batch_size, args.model_kwargs)
     elif args.data_type == 'synthetic':
         load_data = str_to_object(args.dataloader)
-        X_train, C_train, Cond_indices_train = load_data(1000, args.batch_size, args.model_kwargs, corr=True).get_all_items()
-        X_test, C_test, Cond_indices_test = load_data(1000, args.batch_size, args.model_kwargs, corr=True).get_all_items()
+        X_train, C_train, Cond_indices_train = load_data(1000, args.batch_size, args.model_kwargs, corr=False).get_all_items()
+        X_test, C_test, Cond_indices_test = load_data(1000, args.batch_size, args.model_kwargs, corr=False).get_all_items()
     # print(args.model_fn)
 
     model = get_model(args.model_fn, args.model_kwargs).to(device)
@@ -161,7 +151,9 @@ def train_model():
         make_plot_encoding(args, model)
 
     # print(model, opt)
-    save_model(model, path_save_dir)
+    this_model = ModelLoader(model, path_save_dir)
+    this_model.save_model()
+    # save_model(model, path_save_dir)
     path_csv = path_save_dir / Path('costs.csv')
     stats.to_csv(path_csv)
     LOGGER.info(f'Saved: {path_csv}')
