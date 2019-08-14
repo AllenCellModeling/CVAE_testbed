@@ -26,6 +26,9 @@ def test_run():
     """
     Test that synthetic data can pass through network
     """
-    subprocess.call(['./example.sh'])
+    wd = os.getcwd()
+    os.chdir(wd + '/Gaussian_CVAE/tests/')
+
+    subprocess.call(['./example.sh'], shell=True)
     # os.system("sh example.sh")
 
