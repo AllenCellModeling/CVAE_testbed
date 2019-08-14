@@ -26,7 +26,9 @@ import seaborn as sns
 LOGGER = logging.getLogger(__name__)
 
 def get_args():
-
+    """
+    Get args from .sh 
+    """
     def load_synthetic(x):
         with open(x) as fp:
             a = json.load(fp)

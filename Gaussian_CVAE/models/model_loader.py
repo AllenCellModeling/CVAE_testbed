@@ -10,7 +10,7 @@ class ModelLoader:
     def __init__(self, model: nn.Module, path_save_dir: Path) -> None:
         """
         Args: 
-        model: weights of trained neural network
+        trained model: weights of trained neural network
         path_save_dir: Path of saved model    
         """
         self.model = model
