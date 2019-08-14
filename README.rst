@@ -22,6 +22,66 @@ A research testbed on conditional variational autoencoders using Gaussian distri
 
 * Documentation: https://Gaussian-CVAE.readthedocs.io.
 
+Organization
+--------
+
+The project has the following structure::
+
+    Gaussian_CVAE/
+      |- README.rst
+      |- setup.py
+      |- requirements.txt
+      |- tox.ini
+      |- Makefile
+      |- MANIFEST.in
+      |- HISTORY.rst
+      |- CHANGES.rst
+      |- AUTHORS.rst
+      |- LICENSE
+      |- docs/
+         |- ...
+      |- Gaussian_CVAE/
+         |- __init__.py
+         |- main_train.py
+         |- baseline_kwargs.json
+         |- mnist_kwargs.json
+         |- tests/
+            |- __init__.py
+            |- test_function.py
+            |- example.sh
+         |- datasets/
+            |- __init__.py
+            |- dataloader.py
+            |- synthetic.py
+         |- losses/
+            |- __init__.py
+            |- ELBO.py
+         |- metrics/
+            |- __init__.py
+            |- blur.py
+            |- calculate_fid.py
+            |- inception.py
+            |- visualize_encoder.py
+         |- models/
+            |- __init__.py
+            |- CVAE_baseline.py
+            |- CVAE_first.py
+            |- sample.py
+         |- run_models/
+            |- __init__.py
+            |- generative_metric.py
+            |- run_synthetic.py
+            |- run_test_train.py
+            |- test.py
+            |- train.py
+         |- scripts/
+            |- __init__.py
+            |- baseline.sh
+            |- mnist.sh
+            |- compare_models.py
+         |- utils/
+            |- __init__.py
+            |- compare_plots.py
 
 Example run
 --------
