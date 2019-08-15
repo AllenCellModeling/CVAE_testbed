@@ -137,8 +137,8 @@ def train_model():
             LOGGER.info(f'Saved: {path_csv}')
             X_test, C_test, Cond_indices_test = load_data(args.num_batches, args.batch_size, args.model_kwargs, corr=False, train=False, P = proj_matrix).get_all_items()
         else:
-            X_train, C_train, Cond_indices_train,_ = load_data(args.num_batches, args.batch_size, args.model_kwargs, corr=False, train=True).get_all_items()
-            X_test, C_test, Cond_indices_test = load_data(args.num_batches, args.batch_size, args.model_kwargs, corr=False, train=False).get_all_items()
+            X_train, C_train, Cond_indices_train,_ = load_data(args.num_batches, args.batch_size, args.model_kwargs, corr=False, train=True, mask=True).get_all_items()
+            X_test, C_test, Cond_indices_test = load_data(args.num_batches, args.batch_size, args.model_kwargs, corr=False, train=False, mask=True).get_all_items()
         # synthetic_dataloader_train = load_data(args.num_batches, args.batch_size, args.model_kwargs, shuffle=True, corr=False, train=True)
         # X_train, C_train, Cond_indices_train = synthetic_dataloader_train.get_all_items()
         # synthetic_dataloader_test = load_data(args.num_batches, args.batch_size, args.model_kwargs, shuffle=True, corr=False, train=True)

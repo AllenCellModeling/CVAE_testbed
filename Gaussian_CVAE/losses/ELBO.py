@@ -17,6 +17,10 @@ def synthetic_loss(x, reconstructed_x, mean, log_var):
     loss = torch.nn.MSELoss(size_average=False)
     loss_per_element = torch.nn.MSELoss(size_average=False, reduce = False)
 
+    # if x is masked, find indices in x that are 0 and set reconstructed x to 0 as well
+    indices = x == 0
+    reconstructed_x[indices] = 0
+
     RCL = loss(reconstructed_x, x)
     RCL_per_element = loss_per_element(reconstructed_x, x)
                 # kl divergence loss

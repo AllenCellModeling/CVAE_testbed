@@ -118,6 +118,17 @@ Example run
 
 * Run compare_models.py to compare results across output folders
 
+To-do list
+----------
+
+- [x] Projecttion of synthetic data
+- [x] Blog post on usage
+- [ ] Mask projected data with no conditions
+- [ ] Mask projected data with all conditions
+- [ ] Model loader and plotting 
+- [ ] Repo name change
+- [ ] train real data
+
 Support
 -------
 We are not currently supporting this code, but simply releasing it to the community AS IS but are not able to provide any guarantees of support. The community is welcome to submit issues, but you should not expect an active response.

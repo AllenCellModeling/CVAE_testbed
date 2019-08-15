@@ -116,7 +116,10 @@ to train a model with projected synthetic data. If all of the dimensions in the 
 that N latent dimensions (N is the dimension of X) are required to represent the distribution of the projected synthetic data. However, 
 if some of the dimensions are correlated, then it will require <=N dimensions in the latent space. 
 
+* Train a conditional variational autoencoder (CVAE) on masked synthetic data projected onto higher dimensional space 
 
-
+We train a CVAE with synthetic data projected onto a higher dimensional space with the caveat that some of the input data
+is masked. We dont penalize on the masked data - i.e. the MSE error loss/ distortion does not include the error for masked elements (see
+Gaussian_CVAE.losses.ELBO.py). 
 
 

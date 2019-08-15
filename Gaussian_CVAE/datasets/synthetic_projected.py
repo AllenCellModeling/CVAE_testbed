@@ -55,6 +55,12 @@ class ProjectedSyntheticDataset(Dataset):
             C_indicator = C_mask == 0
 
             C = torch.cat([C.float(), C_indicator.float().cuda()], 1)
+
+            if mask is True:
+                # This will mask 20% of the elements in X
+                X_mask = torch.cuda.FloatTensor(X.size()[0], X.size()[1]).uniform_() > 0.8
+                X[X_mask] = 0
+
             X = X.view([1, -1, X.size()[-1]])
             C = C.view([1, -1, C.size()[-1]])
 
