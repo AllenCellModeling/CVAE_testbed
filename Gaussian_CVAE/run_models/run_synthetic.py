@@ -72,7 +72,7 @@ def run_synthetic(args, X_train, C_train, Cond_indices_train, X_test, C_test, Co
 def train(args, epoch, loss_fn, X_train, C_train, Cond_indices_train, batch_size, model, optimizer, gpu_id, model_kwargs):
     model.train()
     train_loss, rcl_loss, kld_loss = 0, 0, 0
-    rcl_per_condition_loss, kld_per_condition_loss = torch.zeros(model_kwargs['x_dim'] + 1), torch.zeros(model_kwargs['x_dim'] + 1)
+    rcl_per_condition_loss, kld_per_condition_loss = torch.zeros(X_train.size()[-1] + 1), torch.zeros(X_train.size()[-1]  + 1)
     batch_cond, batch_rcl, batch_kld = torch.empty([0]), torch.empty([0]), torch.empty([0])
     batch_length = 0
 
@@ -99,13 +99,14 @@ def train(args, epoch, loss_fn, X_train, C_train, Cond_indices_train, batch_size
             # print(kld_per_element[this_cond_positions].size())
             # print(torch.sum(kld_per_element[this_cond_positions], dim = 0).size())
             # print(X_train.size(), cond_labels.size(), torch.unique(cond_labels))
-            if len(torch.unique(cond_labels)) == args.model_kwargs['x_dim'] + 1:
+            if len(torch.unique(cond_labels)) == c.size()[-1] + 1:
                 batch_rcl = torch.cat([batch_rcl.cuda(gpu_id), torch.sum(rcl_per_element[this_cond_positions], dim = 0).view(1, -1)], 0)
                 batch_kld = torch.cat([batch_kld.cuda(gpu_id), torch.sum(kld_per_element[this_cond_positions], dim = 0).view(1, -1)], 0)
                 batch_length += 1
 
             this_cond_rcl = torch.sum(rcl_per_element[this_cond_positions])
             this_cond_kld = torch.sum(kld_per_element[this_cond_positions])
+
             rcl_per_condition_loss[jj] += this_cond_rcl.item()
             kld_per_condition_loss[jj] += this_cond_kld.item()
         optimizer.step()   
@@ -123,7 +124,7 @@ def test(args, epoch, loss_fn, X_test, C_test,Cond_indices_test, batch_size, mod
 
     model.eval()
     test_loss, rcl_loss, kld_loss = 0, 0, 0
-    rcl_per_condition_loss, kld_per_condition_loss = torch.zeros(model_kwargs['x_dim'] + 1), torch.zeros(model_kwargs['x_dim'] + 1)
+    rcl_per_condition_loss, kld_per_condition_loss = torch.zeros(X_test.size()[-1]  + 1), torch.zeros(X_test.size()[-1]  + 1)
     batch_cond, batch_rcl, batch_kld = torch.empty([0]), torch.empty([0]), torch.empty([0])
     batch_length = 0
 
@@ -142,7 +143,7 @@ def test(args, epoch, loss_fn, X_test, C_test,Cond_indices_test, batch_size, mod
             for jj, ii in enumerate(torch.unique(cond_labels)):
 
                 this_cond_positions = cond_labels == ii
-                if len(torch.unique(cond_labels)) == args.model_kwargs['x_dim'] + 1:
+                if len(torch.unique(cond_labels)) == c.size()[-1] + 1:
                     batch_rcl = torch.cat([batch_rcl.cuda(gpu_id), torch.sum(rcl_per_element[this_cond_positions], dim = 0).view(1, -1)], 0)
                     batch_kld = torch.cat([batch_kld.cuda(gpu_id), torch.sum(kld_per_element[this_cond_positions], dim = 0).view(1, -1)], 0)
                     batch_length += 1

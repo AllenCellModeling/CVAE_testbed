@@ -18,11 +18,11 @@ def visualize_encoder_synthetic(args, model, conds, kl_per_lt=None):
         make_data = str_to_object(args.dataloader)
 
 
-        c, d, ind = make_data(1, args.batch_size*4, args.model_kwargs, shuffle = False).get_all_items()
+        c, d, ind, _ = make_data(1, args.batch_size*4, args.model_kwargs, shuffle = False).get_all_items()
         c = c[0, :]
         d = d[0, :]
 
-        tmp1, tmp2 = torch.split(d, args.model_kwargs['x_dim'], dim=1)
+        tmp1, tmp2 = torch.split(d, int(d.size()[-1]/2), dim=1)
         for kk in conds:
             tmp1[:, kk], tmp2[:, kk] = 0, 0
         d = torch.cat((tmp1, tmp2), 1)
@@ -39,7 +39,7 @@ def visualize_encoder_synthetic(args, model, conds, kl_per_lt=None):
             # print(total_loss.item(), rcl.item(), kl_per_lt_temp.item())
             all_kl = np.append(all_kl, kl_per_lt_temp.item())
             all_lt.append(ii)
-            kl_per_lt['num_conds'].append(args.model_kwargs['x_dim'] - len(conds))
+            kl_per_lt['num_conds'].append(c.size()[-1] - len(conds))
             kl_per_lt['latent_dim'].append(ii)
             kl_per_lt['kl_divergence'].append(kl_per_lt_temp.item())
         all_kl, all_lt = list(zip(*sorted(zip(all_kl, all_lt))))

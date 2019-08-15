@@ -1,5 +1,5 @@
 =====================
-CVAE_research_testbed
+CVAE research testbed
 =====================
 
 .. image:: https://travis-ci.org/AllenCellModeling/Gaussian_CVAE.svg?branch=master
@@ -15,7 +15,7 @@ CVAE_research_testbed
         :alt: Codecov Status
 
 
-A research testbed on conditional variational autoencoders using Gaussian distributions as an input
+A research testbed on conditional variational autoencoders using Gaussian distributions as an input.
 
 
 * Free software: Allen Institute Software License

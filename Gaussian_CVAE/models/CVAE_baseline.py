@@ -70,9 +70,6 @@ class CVAE(nn.Module):
         return self.decoder_net(concat_input)
     
     def forward(self, x, c):
-        if self.enc_layer1 != self.xdim:
-            mu, log_var = self.encoder(x.view(-1, self.xdim*2), c)
-        else:
-            mu, log_var = self.encoder(x.view(-1, self.xdim), c)
+        mu, log_var = self.encoder(x, c)
         z = self.sampling(mu, log_var)
         return self.decoder(z, c), mu, log_var

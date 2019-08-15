@@ -36,6 +36,7 @@ def get_args():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', type=int, default=50, help='Mini-batch size')
+    parser.add_argument('--num_batches', type=int, default=100, help='Number of mini-batches')
     parser.add_argument('--dataloader', default='datasets.dataloader.load_mnist_data', help='Data set to load')
     parser.add_argument('--gpu_id', type=int, help='GPU ID')
     parser.add_argument('--loss_fn', default='losses.ELBO.calculate_loss', help='loss_function')
@@ -75,10 +76,7 @@ def save_args(args: argparse.Namespace, path_json: Optional[Path] = None) -> Non
 
 def get_model(model_fn, model_kwargs: Optional[Dict] = None) -> nn.Module:
     model_fn = str_to_object(model_fn)
-    model_kwargs = model_kwargs or {}
-    # print(model_kwargs)
-    # print(model_fn(**model_kwargs))
-    return model_fn(**model_kwargs)
+    return model_fn(model_kwargs['x_dim'],model_kwargs['c_dim'],model_kwargs['enc_layers'],model_kwargs['dec_layers'])
 
 def str_to_object(str_o: str) -> object:
     """Get object from string.
@@ -130,8 +128,16 @@ def train_model():
         train_iterator, test_iterator = load_data(args.batch_size, args.model_kwargs)
     elif args.data_type == 'synthetic':
         load_data = str_to_object(args.dataloader)
-        X_train, C_train, Cond_indices_train = load_data(1000, args.batch_size, args.model_kwargs, corr=False).get_all_items()
-        X_test, C_test, Cond_indices_test = load_data(1000, args.batch_size, args.model_kwargs, corr=False).get_all_items()
+        if 'projection_dim' in args.model_kwargs:
+            X_train, C_train, Cond_indices_train, proj_matrix = load_data(args.num_batches, args.batch_size, args.model_kwargs, corr=False, train=True).get_all_items()
+            X_test, C_test, Cond_indices_test = load_data(args.num_batches, args.batch_size, args.model_kwargs, corr=False, train=False, P = proj_matrix).get_all_items()
+        else:
+            X_train, C_train, Cond_indices_train,_ = load_data(args.num_batches, args.batch_size, args.model_kwargs, corr=False, train=True).get_all_items()
+            X_test, C_test, Cond_indices_test = load_data(args.num_batches, args.batch_size, args.model_kwargs, corr=False, train=False).get_all_items()
+        # synthetic_dataloader_train = load_data(args.num_batches, args.batch_size, args.model_kwargs, shuffle=True, corr=False, train=True)
+        # X_train, C_train, Cond_indices_train = synthetic_dataloader_train.get_all_items()
+        # synthetic_dataloader_test = load_data(args.num_batches, args.batch_size, args.model_kwargs, shuffle=True, corr=False, train=True)
+        # X_test, C_test, Cond_indices_test = synthetic_dataloader_test.get_all_items()
     # print(args.model_fn)
 
     model = get_model(args.model_fn, args.model_kwargs).to(device)
@@ -177,16 +183,21 @@ def make_plot_encoding(args: argparse.Namespace, model) -> None:
     fig2, ax2 = plt.subplots(figsize=(6.5,5))
     fig3, ax3 = plt.subplots(figsize=(6.5,5))
     
-    conds = [i for i in range(args.model_kwargs['x_dim'])]
-    for i in range(args.model_kwargs['x_dim'] + 1):
+    if 'projection_dim' in args.model_kwargs:
+        this_kwargs = args.model_kwargs['projection_dim']
+    else:
+        this_kwargs = args.model_kwargs['x_dim']
+    conds = [i for i in range(this_kwargs)]
+
+    for i in range(len(conds) + 1):
         # print('MAIN PLOT ENCODING')
         # print(conds, i)
         if i == 0:
             z_means_x, z_means_y, kl_per_lt, z_var_x, z_var_y = vis_enc(args, model, conds, kl_per_lt=None)
-            ax.scatter(z_means_x, z_means_y, marker='.', s = 30, label = str(args.model_kwargs['x_dim'] - len(conds)))
+            ax.scatter(z_means_x, z_means_y, marker='.', s = 30, label = str(this_kwargs - len(conds)))
         else:
             z_means_x, z_means_y, kl_per_lt, z_var_x, z_var_y = vis_enc(args, model, conds, kl_per_lt)
-            ax.scatter(z_means_x, z_means_y, marker='.', s = 30, label = str(args.model_kwargs['x_dim'] - len(conds)))
+            ax.scatter(z_means_x, z_means_y, marker='.', s = 30, label = str(this_kwargs - len(conds)))
         try:
             conds.pop()
         except:
@@ -209,8 +220,9 @@ def make_plot_encoding(args: argparse.Namespace, model) -> None:
     # sns.scatterplot(ax = ax, data = tmp1,x= 'z_means_x', y ='z_means_y', s = 20,  color = 'red')
     # sns.scatterplot(ax = ax, data = tmp2,x= 'z_means_x', y ='z_means_y', s = 20,  color = 'green')
     
-        
-    for i in range(args.model_kwargs['x_dim']+1):
+    print(this_kwargs)
+    for i in range(this_kwargs+1):
+        print(i)
         tmp = kl_per_lt.loc[kl_per_lt['num_conds'] == i]  
         tmp = tmp.sort_values(by = 'kl_divergence',  ascending = False)
         tmp = tmp.reset_index(drop=True)
