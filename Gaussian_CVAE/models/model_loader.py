@@ -16,7 +16,6 @@ class ModelLoader:
         self.model = model
         self.path_save_dir = path_save_dir
 
-
     def save_model(self):
         """Saves model weights and metadata in specified directory."""
         self.path_save_dir.mkdir(parents=True, exist_ok=True)
@@ -36,3 +35,12 @@ class ModelLoader:
         model = torch.load(path_weights)
         model.eval()
         return model
+    
+    def load_projection_matrix(self, path_save_dir):
+        """Loads model weights from specified directory"""
+        if path_save_dir is not None:
+            path_weights = path_save_dir / Path('projection_options.pt')
+        else:
+            path_weights = self.path_save_dir / Path('projection_options.pt')
+        projection_matrix = torch.load(path_weights)
+        return projection_matrix

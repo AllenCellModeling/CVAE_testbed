@@ -130,6 +130,11 @@ def train_model():
         load_data = str_to_object(args.dataloader)
         if 'projection_dim' in args.model_kwargs:
             X_train, C_train, Cond_indices_train, proj_matrix = load_data(args.num_batches, args.batch_size, args.model_kwargs, corr=False, train=True).get_all_items()
+            path_csv = path_save_dir / Path('projection_options.pt')
+            print(proj_matrix)
+            with path_csv.open('wb') as fo:
+                torch.save(proj_matrix, fo)
+            LOGGER.info(f'Saved: {path_csv}')
             X_test, C_test, Cond_indices_test = load_data(args.num_batches, args.batch_size, args.model_kwargs, corr=False, train=False, P = proj_matrix).get_all_items()
         else:
             X_train, C_train, Cond_indices_train,_ = load_data(args.num_batches, args.batch_size, args.model_kwargs, corr=False, train=True).get_all_items()
