@@ -29,9 +29,9 @@ where M11..M1N is a mask indicator that indicates whether the corresponding elem
 have been masked or not. So, if N is 2, and B is 4, this is what that could look like::
 
     0.4 0.8 1 1
-    0 0.3 0 1
-    0.7 0 1 0
-    0 0 0 0
+     0  0.3 0 1
+    0.7  0  1 0
+     0   0  0 0
 
 where row 1 has both conditions, row 2 has condition 2, row 3 has condition 1 and row 4 has no condition. 
 
@@ -78,8 +78,8 @@ rotating it ::
 
     0.4
     0.8 
-    0 
-    0
+     0 
+     0
 
 and then multiplying by a projection matrix (P) where P is ::
 
@@ -99,9 +99,9 @@ since our projection matrix (P) is linearly independent, our projected space als
 was to be rewritten as ::
 
     A1 A3 0 0
-    A2 0 0 0 
-    0 B1 0 0
-    0 B2 0 0
+    A2  0 0 0 
+    0  B1 0 0
+    0  B2 0 0
 
 then the first row is no longer linearly independent. Such a projection operation can be done to any number of dimensions with any number
 of correlations. These parameters can be set in ::
