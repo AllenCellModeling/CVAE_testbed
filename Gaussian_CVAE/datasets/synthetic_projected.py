@@ -95,8 +95,8 @@ class ProjectedSyntheticDataset(Dataset):
         P = torch.zeros([self.model_kwargs['projection_dim'], self.model_kwargs['projection_dim']])
         for row in range(P.size()[0]):
             col = torch.randint(0,self.model_kwargs['x_dim'],(1,)).item()
-            #P[row][col] = torch.randn(1).item()
-            P[row][col] = 1
+            P[row][col] = torch.randn(1).item()
+            # P[row][col] = 1
         print(P)
         return P
 

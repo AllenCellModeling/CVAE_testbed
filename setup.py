@@ -86,10 +86,10 @@ setup(
     packages=find_packages(),
     python_requires=">=3.6",
     setup_requires=setup_requirements,
-    test_suite='Gaussian_CVAE/tests',
+    test_suite='Gaussian_CVAE/Gaussian_CVAE/tests',
     tests_require=test_requirements,
     extras_require=extra_requirements,
-    url='https://github.com/ritvikvasan/Gaussian_CVAE',
+    url='https://github.com/AllenCellModeling/Gaussian_CVAE',
     version='0.1.0',
     zip_safe=False,
 )

@@ -32,8 +32,8 @@ class ModelLoader:
             path_weights = path_save_dir / Path('weights.pt')
         else:
             path_weights = self.path_save_dir / Path('weights.pt')
-        model = torch.load(path_weights)
-        model.eval()
+        model = torch.load(path_weights, map_location='cuda:0')
+        # model.eval()
         return model
     
     def load_projection_matrix(self, path_save_dir):
@@ -42,5 +42,5 @@ class ModelLoader:
             path_weights = path_save_dir / Path('projection_options.pt')
         else:
             path_weights = self.path_save_dir / Path('projection_options.pt')
-        projection_matrix = torch.load(path_weights)
+        projection_matrix = torch.load(path_weights, map_location='cuda:0')
         return projection_matrix
