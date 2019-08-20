@@ -192,16 +192,18 @@ def make_plot_encoding(args: argparse.Namespace, model) -> None:
         this_kwargs = args.model_kwargs['projection_dim']
     else:
         this_kwargs = args.model_kwargs['x_dim']
+
+    make_data = str_to_object(args.dataloader)
+    c, d, ind, _ = make_data(1, args.batch_size*4, args.model_kwargs, shuffle = False).get_all_items()
     conds = [i for i in range(this_kwargs)]
 
     for i in range(len(conds) + 1):
-        # print('MAIN PLOT ENCODING')
         # print(conds, i)
         if i == 0:
-            z_means_x, z_means_y, kl_per_lt, z_var_x, z_var_y = vis_enc(args, model, conds, kl_per_lt=None)
+            z_means_x, z_means_y, kl_per_lt, z_var_x, z_var_y = vis_enc(args, model, conds, c[0, :].clone(), d[0, :].clone(), kl_per_lt=None)
             ax.scatter(z_means_x, z_means_y, marker='.', s = 30, label = str(this_kwargs - len(conds)))
         else:
-            z_means_x, z_means_y, kl_per_lt, z_var_x, z_var_y = vis_enc(args, model, conds, kl_per_lt)
+            z_means_x, z_means_y, kl_per_lt, z_var_x, z_var_y = vis_enc(args, model, conds, c[0, :].clone(), d[0, :].clone(), kl_per_lt)
             ax.scatter(z_means_x, z_means_y, marker='.', s = 30, label = str(this_kwargs - len(conds)))
         try:
             conds.pop()
@@ -225,7 +227,7 @@ def make_plot_encoding(args: argparse.Namespace, model) -> None:
     # sns.scatterplot(ax = ax, data = tmp1,x= 'z_means_x', y ='z_means_y', s = 20,  color = 'red')
     # sns.scatterplot(ax = ax, data = tmp2,x= 'z_means_x', y ='z_means_y', s = 20,  color = 'green')
     
-    print(this_kwargs)
+    print('this kwargs', this_kwargs)
     for i in range(this_kwargs+1):
         print(i)
         tmp = kl_per_lt.loc[kl_per_lt['num_conds'] == i]  

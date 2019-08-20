@@ -4,7 +4,7 @@ from Gaussian_CVAE.losses.ELBO import synthetic_loss
 import pandas as pd
 from Gaussian_CVAE.main_train import str_to_object
 
-def visualize_encoder_synthetic(args, model, conds, kl_per_lt=None):
+def visualize_encoder_synthetic(args, model, conds, c, d, kl_per_lt=None):
 
     z_means_x, z_means_y = [], []
     z_var_x, z_var_y = [], []
@@ -15,19 +15,13 @@ def visualize_encoder_synthetic(args, model, conds, kl_per_lt=None):
             kl_per_lt = {'latent_dim': [], 'kl_divergence': [], 'num_conds': []}
         z_means_scatterplot_dict = {'z_means_x': [], 'z_means_y': [], 'z_var_x': [], 'z_var_y': [], 'num_conds': []}
         all_kl, all_lt = [], []
-        make_data = str_to_object(args.dataloader)
-
-
-        c, d, ind, _ = make_data(1, args.batch_size*4, args.model_kwargs, shuffle = False).get_all_items()
-        c = c[0, :]
-        d = d[0, :]
 
         tmp1, tmp2 = torch.split(d, int(d.size()[-1]/2), dim=1)
         for kk in conds:
             tmp1[:, kk], tmp2[:, kk] = 0, 0
-        d = torch.cat((tmp1, tmp2), 1)
+        cond_d = torch.cat((tmp1, tmp2), 1)
 
-        recon_batch, z_means, log_var = model(c.cuda(args.gpu_id), d.cuda(args.gpu_id))
+        recon_batch, z_means, log_var = model(c.cuda(args.gpu_id), cond_d.cuda(args.gpu_id))
         # loss_fn = str_to_object(args.loss_fn)
         # loss_whole_batch, batch_rcl, batch_kld, rcl_per_element, kld_per_element = loss_fn(c.cuda(args.gpu_id), recon_batch.cuda(args.gpu_id), z_means, log_var)
         

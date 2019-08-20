@@ -58,7 +58,7 @@ class ProjectedSyntheticDataset(Dataset):
 
             if mask is True:
                 # This will mask 20% of the elements in X
-                X_mask = torch.cuda.FloatTensor(X.size()[0], X.size()[1]).uniform_() > 0.8
+                X_mask = torch.cuda.FloatTensor(X.size()[0], X.size()[1]).uniform_() > 1 - model_kwargs['mask_percentage']
                 X[X_mask] = 0
 
             X = X.view([1, -1, X.size()[-1]])
@@ -99,9 +99,14 @@ class ProjectedSyntheticDataset(Dataset):
     
     def generate_projection_matrix(self):
         P = torch.zeros([self.model_kwargs['projection_dim'], self.model_kwargs['projection_dim']])
+        col = 0
         for row in range(P.size()[0]):
-            col = torch.randint(0,self.model_kwargs['x_dim'],(1,)).item()
+            # col = torch.randint(0,self.model_kwargs['x_dim'],(1,)).item()
             P[row][col] = torch.randn(1).item()
+            if col != self.model_kwargs['x_dim'] - 1:
+                col += 1
+            else:
+                col = 0
             # P[row][col] = 1
         print(P)
         return P
