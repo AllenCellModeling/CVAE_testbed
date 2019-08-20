@@ -15,7 +15,7 @@ CVAE research testbed
         :alt: Codecov Status
 
 
-A research testbed on conditional variational autoencoders using Gaussian distributions as an input.
+A research testbed on conditional variational autoencoders using Gaussian distributions as an input. We are interested in arbitrary conditioning of a CVAE and finding the relationships between information passing through the latent dimension bottlneck and the input dimensions. Our goal is to generate a fully factoriazable probabilistic model of structures in a cell.
 
 * Free software: Allen Institute Software License
 
@@ -61,7 +61,7 @@ The VAE has learnt clusters for every digit label with just 2 latent dimensions!
 In a CVAE, we can specify during training that the images that it sees are of a certain label (for example, that it is a 5) and so it will only autoencode information that is not related to the digit label. After training, if we were to sample from the latent space and ask for a digit label 5, this is what we would get 
 
 .. image:: https://user-images.githubusercontent.com/40371793/63382176-07ab2480-c34f-11e9-9ed7-67cc3bc83598.png
-   :width: 250px
+   :width: 100px
    :scale: 100 %
    :align: center
 
@@ -69,11 +69,6 @@ The CVAE now encodes information like texture, angle of 5's in the latent space 
 
 .. _paper: https://arxiv.org/abs/1312.6114
 .. _here: https://github.com/dragen1860/pytorch-mnist-vae
-
-
-Overview
----------
-We are interested in arbitrarily conditioning of a CVAE and finding the relationships between information passing through the latent dimension bottlneck and the input dimensions. As such, this repository is a research testbed on CVAE's with the goal of generating a fully factoriazable probabilistic model of structures in a cell.
 
 Organization
 --------
