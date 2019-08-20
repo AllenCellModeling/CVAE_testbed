@@ -1,7 +1,7 @@
 cd ..
 python ~/Github/cookiecutter/Gaussian_CVAE/Gaussian_CVAE/main_train.py \
 	--gpu_id 0 \
-	--path_save_dir ./outputs/baseline_results_swiss_roll/ \
+	--path_save_dir ./outputs/baseline_results_swissroll/ \
 	--model_fn models.CVAE_baseline.CVAE \
     --model_kwargs baseline_swissroll_kwargs.json \
 	--batch_size 64  \
