@@ -136,7 +136,7 @@ Similarly, specifying 4 input dimensions gives
 
 specifying 6 input dimensions gives
 
-.. image:: https://user-images.githubusercontent.com/40371793/63390404-d7ba4c00-c363-11e9-99db-663530743e3e.png
+.. image:: https://user-images.githubusercontent.com/40371793/63449614-4f848700-c3f5-11e9-842e-40b07271a5ed.png
    :width: 750px
    :scale: 100 %
    :align: center
