@@ -151,7 +151,7 @@ and so on.
 
 Projecting 2 dimensions to 4 dimensions gives 
 
-.. image:: https://user-images.githubusercontent.com/40371793/63390404-d7ba4c00-c363-11e9-99db-663530743e3e.png
+.. image:: https://user-images.githubusercontent.com/40371793/63447464-eac72d80-c3f0-11e9-86c9-26df0b5ed8da.png
    :width: 750px
    :scale: 100 %
    :align: center
