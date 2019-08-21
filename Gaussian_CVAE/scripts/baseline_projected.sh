@@ -9,5 +9,5 @@ python ~/Github/cookiecutter/Gaussian_CVAE/Gaussian_CVAE/main_train.py \
     --n_epochs 30 \
     --data_type 'synthetic' \
     --dataloader 'datasets.synthetic_projected.ProjectedSyntheticDataset' \
-    --loss_fn 'losses.ELBO.synthetic_loss' \
+    --loss_fn 'losses.ELBO.synthetic_loss_no_mask' \
     --lr 0.001

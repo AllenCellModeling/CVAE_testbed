@@ -162,7 +162,7 @@ Despite having 3 dimensions, it is parametrized by 2 dimensions. Running this sc
    :scale: 100 %
    :align: center
 
-This plot can be viewed in outputs/baseline_results_swissroll. We observe that on providing 0 conditions (blue), the model uses only 2 dimensions in the latent space, indicating
+This plot can be viewed in outputs/baseline_results_swissroll. We observe that given 0 conditions (blue), the model uses only 2 dimensions in the latent space, indicating that 
 
 
    

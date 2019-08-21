@@ -1,1 +1,1 @@
-{"x_dim": 4, "projection_dim": 8, "c_dim": 16, "enc_layers": [8, 64, 64, 64, 64], "dec_layers": [64, 64, 64, 64, 8], "mask_percentage": 0.3}
+{"x_dim": 2, "projection_dim": 8, "c_dim": 16, "enc_layers": [8, 64, 64, 64, 64], "dec_layers": [64, 64, 64, 64, 8]}
