@@ -3,7 +3,7 @@ python ~/Github/cookiecutter/Gaussian_CVAE/Gaussian_CVAE/main_train.py \
 	--gpu_id 0 \
 	--path_save_dir ./outputs/baseline_results/ \
 	--model_fn models.CVAE_baseline.CVAE \
-    --model_kwargs baseline_kwargs_2.json \
+    --model_kwargs baseline_kwargs_3.json \
 	--batch_size 64  \
     --num_batches 500  \
     --n_epochs 30 \

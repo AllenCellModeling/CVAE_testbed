@@ -12,7 +12,7 @@ def visualize_encoder_synthetic(args, model, conds, c, d, kl_per_lt=None):
 
     with torch.no_grad():
         if kl_per_lt is None:
-            kl_per_lt = {'latent_dim': [], 'kl_divergence': [], 'num_conds': []}
+            kl_per_lt = {'latent_dim': [], 'kl_divergence': [], 'num_conds': [], 'rcl': []}
         z_means_scatterplot_dict = {'z_means_x': [], 'z_means_y': [], 'z_var_x': [], 'z_var_y': [], 'num_conds': []}
         all_kl, all_lt = [], []
 
@@ -28,7 +28,7 @@ def visualize_encoder_synthetic(args, model, conds, c, d, kl_per_lt=None):
         
         for ii in range(z_means.size()[-1]):
             loss_fn = str_to_object(args.loss_fn)
-            total_loss, rcl, kl_per_lt_temp, _, _ = loss_fn(c.cuda(args.gpu_id), recon_batch.cuda(args.gpu_id), z_means[:, ii], log_var[:, ii])
+            total_loss, rcl_per_lt_temp, kl_per_lt_temp, _, _ = loss_fn(c.cuda(args.gpu_id), recon_batch.cuda(args.gpu_id), z_means[:, ii], log_var[:, ii])
 
             # print(total_loss.item(), rcl.item(), kl_per_lt_temp.item())
             all_kl = np.append(all_kl, kl_per_lt_temp.item())
@@ -36,6 +36,7 @@ def visualize_encoder_synthetic(args, model, conds, c, d, kl_per_lt=None):
             kl_per_lt['num_conds'].append(c.size()[-1] - len(conds))
             kl_per_lt['latent_dim'].append(ii)
             kl_per_lt['kl_divergence'].append(kl_per_lt_temp.item())
+            kl_per_lt['rcl'].append(rcl_per_lt_temp.item())
         all_kl, all_lt = list(zip(*sorted(zip(all_kl, all_lt))))
         all_kl = list(all_kl)
         all_lt = list(all_lt)

@@ -5,7 +5,7 @@ python ~/Github/cookiecutter/Gaussian_CVAE/Gaussian_CVAE/main_train.py \
 	--model_fn models.CVAE_baseline.CVAE \
     --model_kwargs baseline_swissroll_kwargs.json \
 	--batch_size 64  \
-    --num_batches 500  \
+    --num_batches 1000  \
     --n_epochs 30 \
     --data_type 'synthetic' \
     --dataloader 'datasets.swiss_roll.SwissRoll' \

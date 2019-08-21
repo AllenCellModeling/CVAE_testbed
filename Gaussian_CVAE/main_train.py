@@ -13,6 +13,8 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from torch import nn
 from torch import optim
+from brokenaxes import brokenaxes
+from matplotlib.gridspec import GridSpec
 from torch.utils.data import DataLoader
 import torch
 from torchvision import transforms
@@ -139,11 +141,6 @@ def train_model():
         else:
             X_train, C_train, Cond_indices_train,_ = load_data(args.num_batches, args.batch_size, args.model_kwargs, corr=False, train=True, mask=True).get_all_items()
             X_test, C_test, Cond_indices_test = load_data(args.num_batches, args.batch_size, args.model_kwargs, corr=False, train=False, mask=True).get_all_items()
-        # synthetic_dataloader_train = load_data(args.num_batches, args.batch_size, args.model_kwargs, shuffle=True, corr=False, train=True)
-        # X_train, C_train, Cond_indices_train = synthetic_dataloader_train.get_all_items()
-        # synthetic_dataloader_test = load_data(args.num_batches, args.batch_size, args.model_kwargs, shuffle=True, corr=False, train=True)
-        # X_test, C_test, Cond_indices_test = synthetic_dataloader_test.get_all_items()
-    # print(args.model_fn)
 
     model = get_model(args.model_fn, args.model_kwargs).to(device)
     # print('model', model)
@@ -161,7 +158,7 @@ def train_model():
         run = str_to_object('run_models.run_synthetic.run_synthetic')
         stats, stats_per_dim = run(args, X_train, C_train, Cond_indices_train, X_test, C_test, Cond_indices_test,
                     args.n_epochs, args.loss_fn, model, opt, args.batch_size, args.gpu_id, args.model_kwargs)
-        make_plot_encoding(args, model)
+        make_plot_encoding(args, model, stats)
 
     # print(model, opt)
     this_model = ModelLoader(model, path_save_dir)
@@ -178,15 +175,26 @@ def train_model():
     make_plot(stats, stats_per_dim, path_save_dir, args)
     LOGGER.info(f'Elapsed time: {time.time() - tic:.2f}')
 
-def make_plot_encoding(args: argparse.Namespace, model) -> None:
-
+def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> None:
+    sns.set_context('talk')
     path_save_dir = Path(args.path_save_dir)
     vis_enc = str_to_object('metrics.visualize_encoder.visualize_encoder_synthetic')
     kl_per_dim = str_to_object('metrics.visualize_encoder.get_sorted_klds')
     conds = [i for i in range(args.model_kwargs['x_dim'])]
-    fig, ax = plt.subplots(figsize=(6.5,5))
-    fig2, ax2 = plt.subplots(figsize=(6.5,5))
-    fig3, ax3 = plt.subplots(figsize=(6.5,5))
+    fig, (ax1, ax, ax2, ax3) = plt.subplots(1, 4, figsize=(7*4,5))
+    fig2 = plt.figure(figsize=(12,10))
+    bax = brokenaxes(xlims=((0, 8), (60, 64)), hspace=.15)
+
+    if 'total_train_losses' in df.columns:
+        sns.lineplot(ax =ax1, data = df, x = 'epoch', y = 'total_train_losses')
+        ax1.set_xlabel('Epoch')
+        ax1.set_ylabel('Loss')
+    if 'total_test_losses' in df.columns:
+        sns.lineplot(ax =ax1, data = df, x = 'epoch', y = 'total_test_losses')
+        ax1.set_xlabel('Epoch')
+        ax1.set_ylabel('Loss')
+        ax1.legend(['Train loss', 'Test loss'])
+    ax1.set_title('Loss vs epoch')
     
     if 'projection_dim' in args.model_kwargs:
         this_kwargs = args.model_kwargs['projection_dim']
@@ -209,72 +217,47 @@ def make_plot_encoding(args: argparse.Namespace, model) -> None:
             conds.pop()
         except:
             pass
-    # path_csv = path_save_dir / Path('encoding_visualize.csv')
-    # z_means_scatterplot.to_csv(path_csv)
-    # LOGGER.info(f'Saved: {path_csv}')
 
     path_csv = path_save_dir / Path('visualize_encoding.csv')
     kl_per_lt = pd.DataFrame(kl_per_lt)
     kl_per_lt.to_csv(path_csv)
     LOGGER.info(f'Saved: {path_csv}')
-
-
+    ax.set_title('Latent space')
     ax.legend()
-    path_save_fig = path_save_dir / Path('encoding_latent_space.png')
-    fig.savefig(path_save_fig, bbox_inches='tight')
-    LOGGER.info(f'Saved: {path_save_fig}')
-    # sns.scatterplot(ax = ax, data = z_means_scatterplot,x= 'z_means_x', y ='z_means_y', s = 20,  hue= 'num_conds')
-    # sns.scatterplot(ax = ax, data = tmp1,x= 'z_means_x', y ='z_means_y', s = 20,  color = 'red')
-    # sns.scatterplot(ax = ax, data = tmp2,x= 'z_means_x', y ='z_means_y', s = 20,  color = 'green')
     
-    print('this kwargs', this_kwargs)
     for i in range(this_kwargs+1):
-        print(i)
         tmp = kl_per_lt.loc[kl_per_lt['num_conds'] == i]  
         tmp = tmp.sort_values(by = 'kl_divergence',  ascending = False)
         tmp = tmp.reset_index(drop=True)
-        # print(tmp)
+        x = tmp.index.values
+        y = tmp.iloc[:, 1].values
         sns.lineplot(ax = ax2, data=tmp, x=tmp.index,y='kl_divergence', label = str(i))
+        #ax2.plot(np.log2(x + 1) , y, label = str(i))
+        bax.plot(x, y, label=str(i))
+        sns.scatterplot(ax = ax3, data=tmp, x='rcl',y='kl_divergence', label = str(i))
+
     ax2.set_xlabel('Latent dimension')
     ax2.set_ylabel('KLD')
-        # fig4, ax4 = plt.subplots(figsize=(6.5,5))
-        # scatters4 = ax4.scatter(z_means_x, z_means_y, marker='.', s=20, c=z_var_x, cmap = 'inferno')
-        # colorbar(scatters4)
-        # path_save_fig = path_save_dir / Path('latent_space_colormap_variance_1_conds' + str(len(conds)) + '.png')
-        # fig4.savefig(path_save_fig, bbox_inches='tight')
+    ax2.set_title('KLD per latent dim')
+    ax3.set_xlabel('MSE')
+    ax3.set_ylabel('KLD')
+    ax3.set_title('MSE vs KLD')
+    bax.legend(loc='best')
+    bax.set_xlabel('Latent dimension')
+    bax.set_ylabel('KLD')
+    bax.set_title('KLD per latent dim')
 
-        # fig5, ax5 = plt.subplots(figsize=(6.5,5))
-        # scatters5 = ax5.scatter(z_means_x, z_means_y, marker='.', s=20, c=z_var_y, cmap = 'inferno')
-        # colorbar(scatters5)
-        # path_save_fig = path_save_dir / Path('latent_space_colormap_variance_2_conds' + str(len(conds)) + '.png')  
-        # fig5.savefig(path_save_fig, bbox_inches='tight')
-        
-        # if j == 0:
-        #     sort_x = np.sort(z_means_x)
-        #     sort_y = np.sort(z_means_y)
-        #     ax.set_xlim([sort_x[0], sort_x[-1]])
-        #     ax.set_ylim([sort_y[0], sort_y[-1]])
-        # ax2.plot(kld_avg_dim, label = str(len(conds)))
-        # ax2.set_xlabel('Latent dimension')
-        # ax2.set_ylabel('Average KL divergence')
+    path_save_fig = path_save_dir / Path('encoding_test_plots.png')
+    fig.savefig(path_save_fig, bbox_inches='tight')
+    LOGGER.info(f'Saved: {path_save_fig}')
 
-        # ax3.plot(kld_avg_dim_5, label = str(len(conds)))
-        # ax3.set_xlabel('Latent dimension')
-        # ax3.set_ylabel('Average KL divergence')
-        # print(conds)
-        # try:
-        #     conds.pop()
-        # except: 
-        #     pass
-    # ax.legend()
-    # ax2.legend()
-
-    path_save_fig = path_save_dir / Path('encoding_KLD_per_dim.png')
+    path_save_fig = path_save_dir / Path('brokenaxes_KLD_per_dim.png')
     fig2.savefig(path_save_fig, bbox_inches='tight')
     LOGGER.info(f'Saved: {path_save_fig}')
-    # path_save_fig = path_save_dir / Path('KLD_per_dim_fifth_epoch.png')
-    # fig3.savefig(path_save_fig, bbox_inches='tight')
-    # LOGGER.info(f'Saved: {path_save_fig}')
+
+
+
+
 
 def make_plot(df: pd.DataFrame, df2: pd.DataFrame, path_save_dir: Path, args: argparse.Namespace) -> None:
     """Generates and saves training loss plot.
@@ -288,41 +271,6 @@ def make_plot(df: pd.DataFrame, df2: pd.DataFrame, path_save_dir: Path, args: ar
     -------
     None
     """
-    fig, ax = plt.subplots(figsize=(6.5,5))
-    # fig2, ax2 = plt.subplots(figsize=(6.5,5))
-
-    if 'total_train_losses' in df.columns:
-        sns.lineplot(ax =ax, data = df, x = 'epoch', y = 'total_train_losses')
-        ax.set_xlabel('Epoch')
-        ax.set_ylabel('Train loss')
-        # ax.set_ylim([0, max_ylim])
-    if 'total_test_losses' in df.columns:
-        sns.lineplot(ax =ax, data = df, x = 'epoch', y = 'total_test_losses')
-        ax.set_xlabel('Epoch')
-        ax.set_ylabel('Test loss')
-        # ax2.set_ylim([0, max_ylim])
-        ax.legend(['Train loss', 'Test loss'])
-    path_save_fig = path_save_dir / Path('costs.png')
-    fig.savefig(path_save_fig, bbox_inches='tight')
-
-    # path_save_fig = path_save_dir / Path('test_costs.png')
-    # fig2.savefig(path_save_fig, bbox_inches='tight')
-    LOGGER.info(f'Saved: {path_save_fig}')
-
-    fig, ax = plt.subplots(figsize=(6.5,5))
-
-    # print(df)
-    if 'test_rcl' in df.columns:
-        sns.lineplot(ax = ax, data = df, x = 'test_rcl', y= 'test_kld', hue = 'num_conds', legend = 'full')
-        # for i in range(len(set(df['num_conds']))):
-        #     tmp = df.loc[df['num_conds'] == i]
-        #     print('minimum RCL', np.sort(tmp['test_rcl'])[0])
-        #     print('minimum KLD', np.sort(tmp['test_klds'])[0])
-        ax.set_xlabel('MSE')
-        ax.set_ylabel('KLD')
-    path_save_fig = path_save_dir / Path('KLD_vs_MSE.png')
-    fig.savefig(path_save_fig, bbox_inches='tight')
-
     fig, ax = plt.subplots(figsize=(6.5,5))
     if 'test_kld_per_dim' in df2.columns:
         sns.lineplot(ax = ax, data = df2, x = 'dimension', y= 'test_kld_per_dim', hue = 'num_conds', legend = 'full')

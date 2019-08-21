@@ -7,6 +7,7 @@ Welcome to Gaussian CVAE's documentation!
 
    readme
    installation
+   background
    usage
    modules
    contributing
