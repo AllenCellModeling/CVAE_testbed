@@ -1,6 +1,5 @@
 import torch
 import numpy as np
-from CVAE_testbed.losses.ELBO import synthetic_loss
 from CVAE_testbed.utils import str_to_object
 import pandas as pd
 
