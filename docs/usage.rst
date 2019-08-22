@@ -2,11 +2,11 @@
 Usage
 =====
 
-* To use Gaussian_CVAE in a project::
+* To use CVAE_testbed in a project::
 
-    import Gaussian_CVAE
+    import CVAE_testbed
 
-Here, we provide a description of what Gaussian_CVAE can do:
+Here, we provide a description of what CVAE_testbed can do:
 
 * Train a conditional variational autoencoder (CVAE) on independent synthetic data. 
 
@@ -35,7 +35,7 @@ have been masked or not. So, if N is 2, and B is 4, this is what that could look
 
 where row 1 has both conditions, row 2 has condition 2, row 3 has condition 1 and row 4 has no condition. 
 
-When we train the neural network (see Gaussian_CVAE/models/CVAE_baseline.py), we ensure that all permutations 
+When we train the neural network (see CVAE_testbed/models/CVAE_baseline.py), we ensure that all permutations 
 of conditions are present in every mini-batch. The kwargs that we need to specify as an input to the neural
 network can be found in::
 
@@ -120,6 +120,6 @@ if some of the dimensions are correlated, then it will require <=N dimensions in
 
 We train a CVAE with synthetic data projected onto a higher dimensional space with the caveat that some of the input data
 is masked. We dont penalize on the masked data - i.e. the MSE error loss/ distortion does not include the error for masked elements (see
-Gaussian_CVAE.losses.ELBO.py). 
+CVAE_testbed.losses.ELBO.py). 
 
 

@@ -2,16 +2,16 @@
 CVAE research testbed
 =====================
 
-.. image:: https://travis-ci.org/AllenCellModeling/Gaussian_CVAE.svg?branch=master
-        :target: https://travis-ci.org/AllenCellModeling/Gaussian_CVAE
+.. image:: https://travis-ci.org/AllenCellModeling/CVAE_testbed.svg?branch=master
+        :target: https://travis-ci.org/AllenCellModeling/CVAE_testbed
         :alt: Build Status
         
 .. image:: https://readthedocs.org/projects/gaussian-cvae/badge/?version=latest
         :target: https://gaussian-cvae.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
-.. image:: https://codecov.io/gh/AllenCellModeling/Gaussian_CVAE/branch/master/graph/badge.svg
-        :target: https://codecov.io/gh/AllenCellModeling/Gaussian_CVAE
+.. image:: https://codecov.io/gh/AllenCellModeling/CVAE_testbed/branch/master/graph/badge.svg
+        :target: https://codecov.io/gh/AllenCellModeling/CVAE_testbed
         :alt: Codecov Status
 
 
@@ -26,7 +26,7 @@ Organization
 
 The project has the following structure::
 
-    Gaussian_CVAE/
+    CVAE_testbed/
       |- README.rst
       |- setup.py
       |- requirements.txt
@@ -39,7 +39,7 @@ The project has the following structure::
       |- LICENSE
       |- docs/
          |- ...
-      |- Gaussian_CVAE/
+      |- CVAE_testbed/
          |- __init__.py
          |- main_train.py
          |- baseline_kwargs.json

@@ -1,7 +1,7 @@
-Gaussian_CVAE
+CVAE_testbed
 =============
 
 .. toctree::
    :maxdepth: 4
 
-   Gaussian_CVAE
+   CVAE_testbed

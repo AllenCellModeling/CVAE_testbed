@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=.
 set BUILDDIR=_build
-set SPHINXPROJ=Gaussian_CVAE
+set SPHINXPROJ=CVAE_testbed
 
 if "%1" == "" goto help
 
