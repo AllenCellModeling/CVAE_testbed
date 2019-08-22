@@ -7,6 +7,6 @@ CVAE_train \
     --num_batches 1000  \
     --n_epochs 30 \
     --data_type 'synthetic' \
-    --dataloader 'CVAE_testbed.datasets.synthetic.SyntheticDataset' \
-    --loss_fn 'CVAE_testbed.losses.ELBO.synthetic_loss' \
+    --dataloader CVAE_testbed.datasets.synthetic.SyntheticDataset \
+    --loss_fn CVAE_testbed.losses.ELBO.synthetic_loss \
     --lr 0.001
