@@ -7,7 +7,7 @@ Submodules
 Gaussian\_CVAE.scripts.compare\_models module
 ---------------------------------------------
 
-.. automodule:: Gaussian_CVAE.scripts.compare_models
+.. automodule:: CVAE_testbed.scripts.compare_models
    :members:
    :undoc-members:
    :show-inheritance:
@@ -16,7 +16,7 @@ Gaussian\_CVAE.scripts.compare\_models module
 Module contents
 ---------------
 
-.. automodule:: Gaussian_CVAE.scripts
+.. automodule:: CVAE_testbed.scripts
    :members:
    :undoc-members:
    :show-inheritance:

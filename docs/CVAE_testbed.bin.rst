@@ -7,7 +7,7 @@ Submodules
 Gaussian\_CVAE.bin.my\_example module
 -------------------------------------
 
-.. automodule:: Gaussian_CVAE.bin.my_example
+.. automodule:: CVAE_testbed.bin.my_example
    :members:
    :undoc-members:
    :show-inheritance:
@@ -16,7 +16,7 @@ Gaussian\_CVAE.bin.my\_example module
 Module contents
 ---------------
 
-.. automodule:: Gaussian_CVAE.bin
+.. automodule:: CVAE_testbed.bin
    :members:
    :undoc-members:
    :show-inheritance:

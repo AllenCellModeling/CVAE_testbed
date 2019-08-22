@@ -6,15 +6,15 @@ Subpackages
 
 .. toctree::
 
-   Gaussian_CVAE.bin
-   Gaussian_CVAE.datasets
-   Gaussian_CVAE.losses
-   Gaussian_CVAE.metrics
-   Gaussian_CVAE.models
-   Gaussian_CVAE.run_models
-   Gaussian_CVAE.scripts
-   Gaussian_CVAE.tests
-   Gaussian_CVAE.utils
+   CVAE_testbed.bin
+   CVAE_testbed.datasets
+   CVAE_testbed.losses
+   CVAE_testbed.metrics
+   CVAE_testbed.models
+   CVAE_testbed.run_models
+   CVAE_testbed.scripts
+   CVAE_testbed.tests
+   CVAE_testbed.utils
 
 Submodules
 ----------
@@ -22,7 +22,7 @@ Submodules
 Gaussian\_CVAE.example module
 -----------------------------
 
-.. automodule:: Gaussian_CVAE.example
+.. automodule:: CVAE_testbed.example
    :members:
    :undoc-members:
    :show-inheritance:
@@ -30,7 +30,7 @@ Gaussian\_CVAE.example module
 Gaussian\_CVAE.main\_train module
 ---------------------------------
 
-.. automodule:: Gaussian_CVAE.main_train
+.. automodule:: CVAE_testbed.main_train
    :members:
    :undoc-members:
    :show-inheritance:
@@ -39,7 +39,7 @@ Gaussian\_CVAE.main\_train module
 Module contents
 ---------------
 
-.. automodule:: Gaussian_CVAE
+.. automodule:: CVAE_testbed
    :members:
    :undoc-members:
    :show-inheritance:

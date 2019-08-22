@@ -7,7 +7,7 @@ Submodules
 Gaussian\_CVAE.losses.ELBO module
 ---------------------------------
 
-.. automodule:: Gaussian_CVAE.losses.ELBO
+.. automodule:: CVAE_testbed.losses.ELBO
    :members:
    :undoc-members:
    :show-inheritance:
@@ -16,7 +16,7 @@ Gaussian\_CVAE.losses.ELBO module
 Module contents
 ---------------
 
-.. automodule:: Gaussian_CVAE.losses
+.. automodule:: CVAE_testbed.losses
    :members:
    :undoc-members:
    :show-inheritance:

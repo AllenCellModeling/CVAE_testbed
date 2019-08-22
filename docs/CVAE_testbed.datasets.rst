@@ -7,7 +7,7 @@ Submodules
 Gaussian\_CVAE.datasets.dataloader module
 -----------------------------------------
 
-.. automodule:: Gaussian_CVAE.datasets.dataloader
+.. automodule:: CVAE_testbed.datasets.dataloader
    :members:
    :undoc-members:
    :show-inheritance:
@@ -16,7 +16,7 @@ Gaussian\_CVAE.datasets.dataloader module
 Module contents
 ---------------
 
-.. automodule:: Gaussian_CVAE.datasets
+.. automodule:: CVAE_testbed.datasets
    :members:
    :undoc-members:
    :show-inheritance:

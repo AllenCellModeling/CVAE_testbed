@@ -12,7 +12,7 @@ To install CVAE_research_testbed, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pip install Gaussian_CVAE
+    $ pip install CVAE_testbed
 
 This is the preferred method to install CVAE_research_testbed, as it will always install the most recent stable release.
 
@@ -32,13 +32,13 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/ritvikvasan/Gaussian_CVAE
+    $ git clone git://github.com/ritvikvasan/CVAE_testbed
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl  -OL https://github.com/ritvikvasan/Gaussian_CVAE/tarball/master
+    $ curl  -OL https://github.com/ritvikvasan/CVAE_testbed/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -47,5 +47,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/ritvikvasan/Gaussian_CVAE
-.. _tarball: https://github.com/ritvikvasan/Gaussian_CVAE/tarball/master
+.. _Github repo: https://github.com/ritvikvasan/CVAE_testbed
+.. _tarball: https://github.com/ritvikvasan/CVAE_testbed/tarball/master

@@ -1,5 +1,5 @@
 cd ..
-python ~/Github/cookiecutter/Gaussian_CVAE/Gaussian_CVAE/main_train.py \
+python ~/Github/cookiecutter/CVAE_testbed/CVAE_testbed/main_train.py \
 	--gpu_id 0 \
 	--path_save_dir ./outputs/baseline_results2/ \
 	--model_fn models.CVAE_baseline.CVAE \

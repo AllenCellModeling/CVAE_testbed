@@ -7,7 +7,7 @@ Submodules
 Gaussian\_CVAE.utils.compare\_plots module
 ------------------------------------------
 
-.. automodule:: Gaussian_CVAE.utils.compare_plots
+.. automodule:: CVAE_testbed.utils.compare_plots
    :members:
    :undoc-members:
    :show-inheritance:
@@ -16,7 +16,7 @@ Gaussian\_CVAE.utils.compare\_plots module
 Module contents
 ---------------
 
-.. automodule:: Gaussian_CVAE.utils
+.. automodule:: CVAE_testbed.utils
    :members:
    :undoc-members:
    :show-inheritance:

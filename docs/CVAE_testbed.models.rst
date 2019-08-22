@@ -7,7 +7,7 @@ Submodules
 Gaussian\_CVAE.models.CVAE\_baseline module
 -------------------------------------------
 
-.. automodule:: Gaussian_CVAE.models.CVAE_baseline
+.. automodule:: CVAE_testbed.models.CVAE_baseline
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ Gaussian\_CVAE.models.CVAE\_baseline module
 Gaussian\_CVAE.models.CVAE\_first module
 ----------------------------------------
 
-.. automodule:: Gaussian_CVAE.models.CVAE_first
+.. automodule:: CVAE_testbed.models.CVAE_first
    :members:
    :undoc-members:
    :show-inheritance:
@@ -23,7 +23,7 @@ Gaussian\_CVAE.models.CVAE\_first module
 Gaussian\_CVAE.models.sample module
 -----------------------------------
 
-.. automodule:: Gaussian_CVAE.models.sample
+.. automodule:: CVAE_testbed.models.sample
    :members:
    :undoc-members:
    :show-inheritance:
@@ -32,7 +32,7 @@ Gaussian\_CVAE.models.sample module
 Module contents
 ---------------
 
-.. automodule:: Gaussian_CVAE.models
+.. automodule:: CVAE_testbed.models
    :members:
    :undoc-members:
    :show-inheritance:
