@@ -10,16 +10,16 @@ helps, and credit will always be given.
 Get Started!
 ------------
 
-Ready to contribute? Here's how to set up `Gaussian_CVAE` for local development.
+Ready to contribute? Here's how to set up `CVAE_testbed` for local development.
 
-1. Fork the `Gaussian_CVAE` repo on GitHub.
+1. Fork the `CVAE_testbed` repo on GitHub.
 2. Clone your fork locally::
 
-    $ git clone git@github.com:your_name_here/Gaussian_CVAE.git
+    $ git clone git@github.com:your_name_here/CVAE_testbed.git
 
 3. Install the project in editable mode. (It is also recommended to work in a virtualenv or anaconda environment)::
 
-    $ cd Gaussian_CVAE/
+    $ cd CVAE_testbed/
     $ pip install -e .[dev]
 
 4. Create a branch for local development::

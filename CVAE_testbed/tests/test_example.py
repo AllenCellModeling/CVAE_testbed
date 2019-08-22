@@ -11,7 +11,7 @@ Docs: https://docs.pytest.org/en/latest/
       https://docs.pytest.org/en/latest/goodpractices.html#conventions-for-python-test-discovery
 """
 
-from Gaussian_CVAE import Example
+from CVAE_testbed import Example
 
 
 class TestExample(object):

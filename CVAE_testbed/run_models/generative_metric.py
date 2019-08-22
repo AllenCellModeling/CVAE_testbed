@@ -4,10 +4,10 @@ import sys
 import matplotlib.pyplot as plt
 import torchvision
 # sys.path.insert(0, '../models/')
-from Gaussian_CVAE.models.CVAE_first import idx2onehot
+from CVAE_testbed.models.CVAE_first import idx2onehot
 # sys.path.insert(0, '../metrics/')
-from Gaussian_CVAE.metrics.inception import InceptionV3
-from Gaussian_CVAE.metrics.calculate_fid import get_activations, calculate_frechet_distance
+from CVAE_testbed.metrics.inception import InceptionV3
+from CVAE_testbed.metrics.calculate_fid import get_activations, calculate_frechet_distance
 
 
 def compute_generative_metric(test_iterator, model, device, LATENT_DIM, BATCH_SIZE, color_value=None, digit_value=None):

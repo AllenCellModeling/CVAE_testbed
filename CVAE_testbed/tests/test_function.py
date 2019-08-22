@@ -11,8 +11,8 @@ Docs: https://docs.pytest.org/en/latest/
       https://docs.pytest.org/en/latest/goodpractices.html#conventions-for-python-test-discovery
 """
 
-from Gaussian_CVAE.datasets.synthetic import SyntheticDataset
-from Gaussian_CVAE.main_train import get_model, str_to_object, get_args, make_plot_encoding
+from CVAE_testbed.datasets.synthetic import SyntheticDataset
+from CVAE_testbed.main_train import get_model, str_to_object, get_args, make_plot_encoding
 import torch
 from torch import optim
 
@@ -31,7 +31,7 @@ def test_synthetic_baseline():
     load_data = str_to_object(args.dataloader)
     X_train, C_train, Cond_indices_train,_ = load_data(args.num_batches, args.batch_size, args.model_kwargs, corr=False, train=True, mask=True).get_all_items()
     X_test, C_test, Cond_indices_test = load_data(args.num_batches, args.batch_size, args.model_kwargs, corr=False, train=False, mask=True).get_all_items()
-    run = str_to_object('Gaussian_CVAE.run_models.run_synthetic.run_synthetic')
+    run = str_to_object('CVAE_testbed.run_models.run_synthetic.run_synthetic')
 
     device = (
         torch.device('cuda', args.gpu_id) if torch.cuda.is_available()

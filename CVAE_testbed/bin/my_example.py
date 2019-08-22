@@ -10,7 +10,7 @@ import sys
 import argparse
 import logging
 import traceback
-from Gaussian_CVAE import get_module_version, Example
+from CVAE_testbed import get_module_version, Example
 
 ###############################################################################
 

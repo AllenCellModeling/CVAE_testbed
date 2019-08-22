@@ -21,7 +21,7 @@ from torchvision import transforms
 from typing import Optional, Dict
 import pandas as pd
 import numpy as np
-from Gaussian_CVAE.models.model_loader import ModelLoader
+from CVAE_testbed.models.model_loader import ModelLoader
 
 import seaborn as sns
 
@@ -39,15 +39,15 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', type=int, default=5, help='Mini-batch size')
     parser.add_argument('--num_batches', type=int, default=10, help='Number of mini-batches')
-    parser.add_argument('--dataloader', default='Gaussian_CVAE.datasets.synthetic.SyntheticDataset', help='Data set to load')
+    parser.add_argument('--dataloader', default='CVAE_testbed.datasets.synthetic.SyntheticDataset', help='Data set to load')
     parser.add_argument('--gpu_id', default=0, type=int, help='GPU ID')
-    parser.add_argument('--loss_fn', default='Gaussian_CVAE.losses.ELBO.synthetic_loss', help='loss_function')
+    parser.add_argument('--loss_fn', default='CVAE_testbed.losses.ELBO.synthetic_loss', help='loss_function')
     parser.add_argument('--lr', type=float, default=0.001, help='Learning rate')
-    parser.add_argument('--model_fn', default='Gaussian_CVAE.models.CVAE_baseline.CVAE', help=', Model name')
+    parser.add_argument('--model_fn', default='CVAE_testbed.models.CVAE_baseline.CVAE', help=', Model name')
     parser.add_argument('--model_kwargs', type=lambda x: load_synthetic(x), default={"x_dim": 2, "c_dim": 4, "enc_layers": [2, 64, 64, 64, 64], "dec_layers": [64, 64, 64, 64, 2]}, help='Model kwargs')
     parser.add_argument('--n_epochs', type=int, default=10, help='Number of training epochs')
     parser.add_argument('--data_type', default='synthetic', help='mnist or synthetic data')
-    parser.add_argument('--path_save_dir',default='Gaussian_CVAE/outputs/baseline_results/', help='Model save directory')
+    parser.add_argument('--path_save_dir',default='CVAE_testbed/outputs/baseline_results/', help='Model save directory')
     args = parser.parse_args()
 
     # args.path_save_dir = (
@@ -182,8 +182,8 @@ def train_model():
 def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> None:
     sns.set_context('talk')
     path_save_dir = Path(args.path_save_dir)
-    vis_enc = str_to_object('Gaussian_CVAE.metrics.visualize_encoder.visualize_encoder_synthetic')
-    kl_per_dim = str_to_object('Gaussian_CVAE.metrics.visualize_encoder.get_sorted_klds')
+    vis_enc = str_to_object('CVAE_testbed.metrics.visualize_encoder.visualize_encoder_synthetic')
+    kl_per_dim = str_to_object('CVAE_testbed.metrics.visualize_encoder.get_sorted_klds')
     conds = [i for i in range(args.model_kwargs['x_dim'])]
     fig, (ax1, ax, ax2, ax3) = plt.subplots(1, 4, figsize=(7*4,5))
     fig2 = plt.figure(figsize=(12,10))

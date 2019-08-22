@@ -1,7 +1,7 @@
 import torch
 import sys
 sys.path.insert(0, '.')
-from Gaussian_CVAE.models.CVAE_first import idx2onehot
+from CVAE_testbed.models.CVAE_first import idx2onehot
 
 class Sample():
     def __init__(self, x, y, BATCH_SIZE, device):

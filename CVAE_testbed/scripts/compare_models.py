@@ -1,6 +1,6 @@
 import sys
 sys.path.insert(0, '../.')
-from Gaussian_CVAE.utils.compare_plots import compare_plots_best_performing, plot_single_model_multiple_epoch, plot_multiple_model_multiple_epoch
+from CVAE_testbed.utils.compare_plots import compare_plots_best_performing, plot_single_model_multiple_epoch, plot_multiple_model_multiple_epoch
 
 paths_to_compare = ["~/Github/Fully_factorizable_CVAE/outputs/baseline_results/2019:08:06:15:55:41/", 
                     "~/Github/Fully_factorizable_CVAE/outputs/baseline_results_2/2019:08:06:15:55:47/",
