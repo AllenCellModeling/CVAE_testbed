@@ -105,5 +105,8 @@ ENV/
 # mkdocs documentation
 /site
 
+# outputs folder
+/scripts/outputs
+
 # mypy
 .mypy_cache/
