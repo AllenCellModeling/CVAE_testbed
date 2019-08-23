@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 from torch.distributions import MultivariateNormal
 import numpy as np
+from sklearn import manifold, datasets
 
 class SwissRoll(Dataset):
     def __init__(self, num_batches, BATCH_SIZE, model_kwargs, shuffle=True, corr=False, train=True, mask=False):
@@ -38,6 +39,18 @@ class SwissRoll(Dataset):
             Y = 1./6*(phi + sigma*xi)*np.cos(phi)
 
             swiss_roll = torch.from_numpy(np.array([X, Y, Z]).transpose()).float()
+            self._color = np.sqrt(X**2 + Y**2)
+
+            # swiss_roll, color = datasets.samples_generator.make_swiss_roll(n_samples=m, noise=0.05)
+            # swiss_roll = swiss_roll[:, [2, 0, 1]]
+            # self._color = color
+            # swiss_roll = torch.from_numpy(swiss_roll).float()
+
+            if mask is True:
+                mask_indices = torch.cuda.FloatTensor(swiss_roll.size()[0]).uniform_() > 1 - model_kwargs['mask_percentage']
+                swiss_roll[mask_indices, 0] = 0
+                swiss_roll[mask_indices, 1] = 0
+                swiss_roll[mask_indices, 2] = 0
         
             C = swiss_roll.clone()
             count = 0
@@ -100,6 +113,9 @@ class SwissRoll(Dataset):
         columns have been masked
         """
         return self._batches_x[idx], self._batches_c[idx], self._batches_conds[idx]
+
+    def get_color(self):
+        return self._color
 
     def get_all_items(self):
         if self.train is True:

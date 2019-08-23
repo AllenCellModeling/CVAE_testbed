@@ -15,6 +15,7 @@ from brokenaxes import brokenaxes
 from typing import Optional, Dict
 import pandas as pd
 import numpy as np
+from mpl_toolkits.mplot3d import Axes3D 
 from CVAE_testbed.models.model_loader import ModelLoader
 
 import seaborn as sns
@@ -171,12 +172,12 @@ def train_model():
         load_data = str_to_object(args.dataloader)
         train_iterator, test_iterator = load_data(args.batch_size, args.model_kwargs)
     elif args.data_type == "synthetic":
+        if "mask_percentage" in args.model_kwargs:
+            mask_bool = True
+        else:
+            mask_bool = False
         load_data = str_to_object(args.dataloader)
         if "projection_dim" in args.model_kwargs:
-            if "mask_percentage" in args.model_kwargs:
-                mask_bool = True
-            else:
-                mask_bool = False
             X_train, C_train, Cond_indices_train, proj_matrix = load_data(
                 args.num_batches,
                 args.batch_size,
@@ -206,7 +207,7 @@ def train_model():
                 args.model_kwargs,
                 corr=False,
                 train=True,
-                mask=True,
+                mask=mask_bool,
             ).get_all_items()
             X_test, C_test, Cond_indices_test = load_data(
                 args.num_batches,
@@ -214,7 +215,7 @@ def train_model():
                 args.model_kwargs,
                 corr=False,
                 train=False,
-                mask=True,
+                mask=mask_bool,
             ).get_all_items()
 
     model = get_model(args.model_fn, args.model_kwargs).to(device)
@@ -272,7 +273,7 @@ def train_model():
 
     make_plot(stats, stats_per_dim, path_save_dir, args)
     LOGGER.info(f"Elapsed time: {time.time() - tic:.2f}")
-
+    print('saved:', path_save_dir)
 
 def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> None:
     sns.set_context("talk")
@@ -303,10 +304,14 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
         this_kwargs = args.model_kwargs["x_dim"]
 
     make_data = str_to_object(args.dataloader)
-    c, d, ind, _ = make_data(
-        1, args.batch_size * 4, args.model_kwargs, shuffle=False
-    ).get_all_items()
+    this_dataloader = make_data(1, args.batch_size*10, args.model_kwargs, shuffle = False)
+    c, d, ind, _ = this_dataloader.get_all_items()
+
     conds = [i for i in range(this_kwargs)]
+    if args.dataloader == 'CVAE_testbed.datasets.swiss_roll.SwissRoll':
+        color = this_dataloader.get_color()
+    else:
+        color = None
 
     for i in range(len(conds) + 1):
         # print(conds, i)
@@ -321,6 +326,8 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
                 s=30,
                 label=str(this_kwargs - len(conds)),
             )
+            if color is not None:
+                colormap_plot(path_save_dir, c, z_means_x, z_means_y, color, conds)
         else:
             z_means_x, z_means_y, kl_per_lt, z_var_x, z_var_y = vis_enc(
                 args, model, conds, c[0, :].clone(), d[0, :].clone(), kl_per_lt
@@ -332,6 +339,8 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
                 s=30,
                 label=str(this_kwargs - len(conds)),
             )
+            if color is not None:
+                colormap_plot(path_save_dir, c, z_means_x, z_means_y, color, conds)
         try:
             conds.pop()
         except:
@@ -382,6 +391,24 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
     except:
         pass
 
+def colormap_plot(path_save_dir, swiss_roll, z_means_x, z_means_y, color, conds) -> None:
+
+    # fig, ax = plt.subplots(1, 2, figsize=(7*2,5))
+    fig = plt.figure(figsize = (7*2, 5))
+
+    ax1 = fig.add_subplot(121, projection='3d')
+    swiss_roll = swiss_roll[0, :]
+    ax1.scatter(swiss_roll[:, 0], swiss_roll[:,1], swiss_roll[:, 2], c =  color )
+
+    ax = fig.add_subplot(122)
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes('right', size='5%', pad=0.05, title='arc length')
+    a = ax.scatter(z_means_x, z_means_y, c = color)
+    fig.colorbar(a, cax=cax)
+
+    path_save_fig = path_save_dir / Path('latent_space_colormap_conds_' + str(3 - len(conds)) + '.png')
+    fig.savefig(path_save_fig, bbox_inches='tight')
+    LOGGER.info(f'Saved: {path_save_fig}')
 
 def make_plot(
     df: pd.DataFrame, df2: pd.DataFrame, path_save_dir: Path, args: argparse.Namespace
