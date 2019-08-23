@@ -1,12 +1,12 @@
 CVAE_train \
 	--gpu_id 0 \
-	--path_save_dir ./outputs/baseline_results_swissroll/ \
+	--path_save_dir ./outputs/baseline_results_swissroll_with_mask/ \
 	--model_fn CVAE_testbed.models.CVAE_residual.CVAE \
-    --model_kwargs baseline_swissroll_kwargs.json \
+    --model_kwargs baseline_swissroll_kwargs_with_mask.json \
 	--batch_size 64  \
     --num_batches 500  \
     --n_epochs 30 \
     --data_type 'synthetic' \
     --dataloader CVAE_testbed.datasets.swiss_roll.SwissRoll \
-    --loss_fn CVAE_testbed.losses.ELBO.synthetic_loss_no_mask \
+    --loss_fn CVAE_testbed.losses.ELBO.synthetic_loss \
     --lr 0.001

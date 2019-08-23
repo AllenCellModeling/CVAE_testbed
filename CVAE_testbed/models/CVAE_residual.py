@@ -47,8 +47,7 @@ class ResidualBlock(nn.Module):
     def forward(self, x):
         x_out = self.residual_block(x) + self.bypass(x)
         x_out = self.activation(x_out)
-        return x_out
-        
+        return x_out    
 
 class CVAE(nn.Module):
     def __init__(self, x_dim, c_dim, enc_layers, dec_layers):
