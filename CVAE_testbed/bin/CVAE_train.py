@@ -261,7 +261,7 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
         "CVAE_testbed.metrics.visualize_encoder.visualize_encoder_synthetic"
     )
     kl_per_dim = str_to_object("CVAE_testbed.metrics.visualize_encoder.get_sorted_klds")
-    conds = [i for i in range(args.model_kwargs["x_dim"])]
+    conds = [i for i in range(args.model_kwargs["dec_layers"][-1])]
     fig, (ax1, ax, ax2, ax3) = plt.subplots(1, 4, figsize=(7 * 4, 5))
     fig2 = plt.figure(figsize=(12, 10))
     bax = brokenaxes(xlims=((0, 8), (60, 64)), hspace=0.15)
@@ -277,10 +277,8 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
         ax1.legend(["Train loss", "Test loss"])
     ax1.set_title("Loss vs epoch")
 
-    if "projection_dim" in args.model_kwargs:
-        this_kwargs = args.model_kwargs["projection_dim"]
-    else:
-        this_kwargs = args.model_kwargs["x_dim"]
+
+    this_kwargs = args.model_kwargs["dec_layers"][-1]
 
     make_data = str_to_object(args.dataloader)
     this_dataloader = make_data(
