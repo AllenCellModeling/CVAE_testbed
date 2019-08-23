@@ -15,8 +15,9 @@ from brokenaxes import brokenaxes
 from typing import Optional, Dict
 import pandas as pd
 import numpy as np
-from mpl_toolkits.mplot3d import Axes3D 
+from mpl_toolkits.mplot3d import Axes3D
 from CVAE_testbed.models.model_loader import ModelLoader
+from CVAE_testbed.utils import str_to_object
 
 import seaborn as sns
 
@@ -110,30 +111,7 @@ def save_args(args: argparse.Namespace, path_json: Optional[Path] = None) -> Non
 
 def get_model(model_fn, model_kwargs: Optional[Dict] = None) -> nn.Module:
     model_fn = str_to_object(model_fn)
-    return model_fn(
-        model_kwargs["x_dim"],
-        model_kwargs["c_dim"],
-        model_kwargs["enc_layers"],
-        model_kwargs["dec_layers"],
-    )
-
-
-def str_to_object(str_o: str) -> object:
-    """Get object from string.
-    Parameters
-    ----------
-    str_o
-        Fully qualified object name.
-    Returns
-    -------
-    object
-        Some Python object.
-    """
-    parts = str_o.split(".")
-    if len(parts) == 1:
-        return inspect.currentframe().f_back.f_globals[str_o]
-    module = importlib.import_module(".".join(parts[:-1]))
-    return getattr(module, parts[-1])
+    return model_fn(**model_kwargs)
 
 
 def colorbar(mappable):
@@ -273,7 +251,8 @@ def train_model():
 
     make_plot(stats, stats_per_dim, path_save_dir, args)
     LOGGER.info(f"Elapsed time: {time.time() - tic:.2f}")
-    print('saved:', path_save_dir)
+    print("saved:", path_save_dir)
+
 
 def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> None:
     sns.set_context("talk")
@@ -304,11 +283,13 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
         this_kwargs = args.model_kwargs["x_dim"]
 
     make_data = str_to_object(args.dataloader)
-    this_dataloader = make_data(1, args.batch_size*10, args.model_kwargs, shuffle = False)
+    this_dataloader = make_data(
+        1, args.batch_size * 10, args.model_kwargs, shuffle=False
+    )
     c, d, ind, _ = this_dataloader.get_all_items()
 
     conds = [i for i in range(this_kwargs)]
-    if args.dataloader == 'CVAE_testbed.datasets.swiss_roll.SwissRoll':
+    if args.dataloader == "CVAE_testbed.datasets.swiss_roll.SwissRoll":
         color = this_dataloader.get_color()
     else:
         color = None
@@ -391,24 +372,30 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
     except:
         pass
 
-def colormap_plot(path_save_dir, swiss_roll, z_means_x, z_means_y, color, conds) -> None:
+
+def colormap_plot(
+    path_save_dir, swiss_roll, z_means_x, z_means_y, color, conds
+) -> None:
 
     # fig, ax = plt.subplots(1, 2, figsize=(7*2,5))
-    fig = plt.figure(figsize = (7*2, 5))
+    fig = plt.figure(figsize=(7 * 2, 5))
 
-    ax1 = fig.add_subplot(121, projection='3d')
+    ax1 = fig.add_subplot(121, projection="3d")
     swiss_roll = swiss_roll[0, :]
-    ax1.scatter(swiss_roll[:, 0], swiss_roll[:,1], swiss_roll[:, 2], c =  color )
+    ax1.scatter(swiss_roll[:, 0], swiss_roll[:, 1], swiss_roll[:, 2], c=color)
 
     ax = fig.add_subplot(122)
     divider = make_axes_locatable(ax)
-    cax = divider.append_axes('right', size='5%', pad=0.05, title='arc length')
-    a = ax.scatter(z_means_x, z_means_y, c = color)
+    cax = divider.append_axes("right", size="5%", pad=0.05, title="arc length")
+    a = ax.scatter(z_means_x, z_means_y, c=color)
     fig.colorbar(a, cax=cax)
 
-    path_save_fig = path_save_dir / Path('latent_space_colormap_conds_' + str(3 - len(conds)) + '.png')
-    fig.savefig(path_save_fig, bbox_inches='tight')
-    LOGGER.info(f'Saved: {path_save_fig}')
+    path_save_fig = path_save_dir / Path(
+        "latent_space_colormap_conds_" + str(3 - len(conds)) + ".png"
+    )
+    fig.savefig(path_save_fig, bbox_inches="tight")
+    LOGGER.info(f"Saved: {path_save_fig}")
+
 
 def make_plot(
     df: pd.DataFrame, df2: pd.DataFrame, path_save_dir: Path, args: argparse.Namespace
