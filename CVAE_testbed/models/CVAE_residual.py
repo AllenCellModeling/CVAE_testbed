@@ -3,42 +3,7 @@ import torch.nn as nn
 
 from CVAE_testbed.utils import weight_init
 
-# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-# transforms = transforms.Compose([transforms.ToTensor()])
-
-
-class ResidualBlock(nn.Module):
-    def __init__(self, n_in, n_out, n_bottleneck=32, bn=True, activation="relu"):
-        super(ResidualBlock, self).__init__()
-
-        self.n_in = n_in
-        self.n_out = n_out
-        if activation == "relu":
-            self.activation = nn.ReLU()
-        elif activation == "sigmoid":
-            self.activation = nn.Sigmoid()
-        elif (activation is None) or (activation == "none"):
-            self.activation = nn.Sequential()
-
-        basic_layer = []
-        basic_layer.append(nn.Linear(n_in, n_bottleneck))
-        if bn:
-            basic_layer.append(nn.BatchNorm1d(n_bottleneck))
-        basic_layer.append(nn.ReLU())
-        basic_layer.append(nn.Linear(n_bottleneck, n_out))
-        if bn:
-            basic_layer.append(nn.BatchNorm1d(num_features=n_out))
-        self.residual_block = nn.Sequential(*basic_layer)
-
-        if n_in != n_out:
-            self.bypass = nn.Linear(n_in, n_out)
-        else:
-            self.bypass = nn.Sequential()
-
-    def forward(self, x):
-        x_out = self.residual_block(x) + self.bypass(x)
-        x_out = self.activation(x_out)
-        return x_out
+from ..layers import ResidualBlock
 
 
 class CVAE(nn.Module):
@@ -80,7 +45,6 @@ class CVAE(nn.Module):
         self.apply(weight_init)
 
     def encoder(self, x, c):
-
         concat_input = torch.cat([x, c], 1)
         h = self.encoder_net(concat_input)
         return self.fc1(h), self.fc2(h)
