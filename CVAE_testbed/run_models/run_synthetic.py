@@ -86,14 +86,15 @@ def run_synthetic(
         # print(batch_kld.size())
         # print(batch_rcl.size())
         # print(test_batch_kld.size())
+
         for j in range(len(train_rcl_per_cond)):
             # print('outside', batch_num_test)
             # print(j)
 
             # print(test_batch_kld.size())
             # print(test_batch_rcl.size())
-            this_cond_rcl = test_batch_rcl[j :: args.model_kwargs["x_dim"] + 1, :]
-            this_cond_kld = test_batch_kld[j :: args.model_kwargs["x_dim"] + 1, :]
+            this_cond_rcl = test_batch_rcl[j :: X_train.shape[2] + 1, :]
+            this_cond_kld = test_batch_kld[j :: X_train.shape[2] + 1, :]
             # print(this_cond_rcl.size(), this_cond_kld.size())
             # print(this_cond_positions)
             summed_rcl = torch.sum(this_cond_rcl, dim=0) / batch_num_test
