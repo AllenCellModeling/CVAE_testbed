@@ -111,8 +111,11 @@ def save_args(args: argparse.Namespace, path_json: Optional[Path] = None) -> Non
 
 def get_model(model_fn, model_kwargs: Optional[Dict] = None) -> nn.Module:
     model_fn = str_to_object(model_fn)
-    return model_fn(**model_kwargs)
-
+    try:
+        return model_fn(**model_kwargs)
+    except:
+        a = dict([(key, value) for key,value in model_kwargs.items() if key != "sklearn_data"])
+        return model_fn(**a)
 
 def colorbar(mappable):
     ax = mappable.axes
@@ -274,6 +277,7 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
         sns.lineplot(ax=ax1, data=df, x="epoch", y="total_test_losses")
         ax1.set_xlabel("Epoch")
         ax1.set_ylabel("Loss")
+        ax1.set_ylim([0, df.total_test_losses.quantile(0.95)])
         ax1.legend(["Train loss", "Test loss"])
     ax1.set_title("Loss vs epoch")
 

@@ -1,0 +1,1 @@
+{"x_dim": 2, "c_dim": 4, "enc_layers": [2, 64, 64, 64, 64], "dec_layers": [64, 64, 64, 64, 2], "sklearn_data": "circles"}
