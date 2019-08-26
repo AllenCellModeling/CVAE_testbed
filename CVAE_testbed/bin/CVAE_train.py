@@ -1,7 +1,6 @@
 import argparse
 import logging
 import json
-import importlib
 import time
 from pathlib import Path
 import datetime
@@ -26,7 +25,7 @@ LOGGER = logging.getLogger(__name__)
 
 def get_args():
     """
-    Get args from .sh 
+    Get args from .sh
     """
 
     def load_synthetic(x):
@@ -40,9 +39,9 @@ def get_args():
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--batch_size", 
-        type=int, 
-        default=5, 
+        "--batch_size",
+        type=int,
+        default=5,
         help="Mini-batch size"
     )
     parser.add_argument(
@@ -75,9 +74,9 @@ def get_args():
         help="loss_function",
     )
     parser.add_argument(
-        "--lr", 
-        type=float, 
-        default=0.001, 
+        "--lr",
+        type=float,
+        default=0.001,
         help="Learning rate")
     parser.add_argument(
         "--model_fn",
@@ -94,6 +93,14 @@ def get_args():
             "dec_layers": [64, 64, 64, 64, 2],
         },
         help="Model kwargs",
+    )
+    parser.add_argument(
+        "--post_plot_kwargs",
+        type=lambda x: load_synthetic(x),
+        default={
+            "latent_space_colorbar": False,
+        },
+        help="Post-hoc plot kwargs",
     )
     parser.add_argument(
         "--n_epochs", type=int, default=10, help="Number of training epochs"
@@ -114,7 +121,10 @@ def get_args():
     return args
 
 
-def save_args(args: argparse.Namespace, path_json: Optional[Path] = None) -> None:
+def save_args(
+        args: argparse.Namespace,
+        path_json: Optional[Path] = None
+        ) -> None:
     """Save command-line arguments as json.s
     Parameters
     ----------
@@ -146,6 +156,7 @@ def get_model(model_fn, model_kwargs: Optional[Dict] = None) -> nn.Module:
             ]
         )
         return model_fn(**a)
+
 
 def colorbar(mappable):
     ax = mappable.axes
@@ -181,7 +192,9 @@ def train_model():
 
     if args.data_type == "mnist":
         load_data = str_to_object(args.dataloader)
-        train_iterator, test_iterator = load_data(args.batch_size, args.model_kwargs)
+        train_iterator, test_iterator = load_data(
+            args.batch_size, args.model_kwargs
+            )
     elif args.data_type == "synthetic":
         if "mask_percentage" in args.model_kwargs:
             mask_bool = True
@@ -236,7 +249,9 @@ def train_model():
     loss_fn = str_to_object(args.loss_fn)
 
     if args.data_type == "mnist":
-        run = str_to_object("CVAE_testbed.run_models.run_test_train.run_test_train")
+        run = str_to_object(
+            "CVAE_testbed.run_models.run_test_train.run_test_train"
+            )
 
         stats = run(
             model,
@@ -251,7 +266,9 @@ def train_model():
         )
     elif args.data_type == "synthetic":
         # run = str_to_object('run_models.run_synthetic.run_synthetic')
-        run = str_to_object("CVAE_testbed.run_models.run_synthetic.run_synthetic")
+        run = str_to_object(
+            "CVAE_testbed.run_models.run_synthetic.run_synthetic"
+            )
         stats, stats_per_dim = run(
             args,
             X_train,
@@ -287,13 +304,15 @@ def train_model():
     print("saved:", path_save_dir)
 
 
-def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> None:
+def make_plot_encoding(
+        args: argparse.Namespace, model, df: pd.DataFrame
+        ) -> None:
     sns.set_context("talk")
     path_save_dir = Path(args.path_save_dir)
     vis_enc = str_to_object(
         "CVAE_testbed.metrics.visualize_encoder.visualize_encoder_synthetic"
     )
-    conds = [i for i in range(args.model_kwargs["dec_layers"][-1])]
+    conds = [i for i in range(args.model_kwargs["x_dim"])]
     fig, (ax1, ax, ax2, ax3) = plt.subplots(1, 4, figsize=(7 * 4, 5))
     fig2 = plt.figure(figsize=(12, 10))
     bax = brokenaxes(xlims=((0, 8), (60, 64)), hspace=0.15)
@@ -310,7 +329,7 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
         ax1.legend(["Train loss", "Test loss"])
     ax1.set_title("Loss vs epoch")
 
-    this_kwargs = args.model_kwargs["dec_layers"][-1]
+    this_kwargs = args.model_kwargs["x_dim"]
 
     make_data = str_to_object(args.dataloader)
     this_dataloader = make_data(
@@ -319,7 +338,7 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
     c, d, _, _ = this_dataloader.get_all_items()
 
     conds = [i for i in range(this_kwargs)]
-    if args.dataloader == "CVAE_testbed.datasets.swiss_roll.SwissRoll":
+    if args.post_plot_kwargs["latent_space_colorbar"] == "yes":
         color = this_dataloader.get_color()
     else:
         color = None
@@ -328,7 +347,12 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
         # print(conds, i)
         if i == 0:
             z_means_x, z_means_y, kl_per_lt, _, _ = vis_enc(
-                args, model, conds, c[0, :].clone(), d[0, :].clone(), kl_per_lt=None
+                args,
+                model,
+                conds,
+                c[0, :].clone(),
+                d[0, :].clone(),
+                kl_per_lt=None
             )
             ax.scatter(
                 z_means_x,
@@ -338,10 +362,19 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
                 label=str(this_kwargs - len(conds)),
             )
             if color is not None:
-                colormap_plot(path_save_dir, c, z_means_x, z_means_y, color, conds)
+                colormap_plot(
+                    path_save_dir,
+                    c, z_means_x,
+                    z_means_y, color,
+                    conds)
         else:
             z_means_x, z_means_y, kl_per_lt, _, _ = vis_enc(
-                args, model, conds, c[0, :].clone(), d[0, :].clone(), kl_per_lt
+                args,
+                model,
+                conds,
+                c[0, :].clone(),
+                d[0, :].clone(),
+                kl_per_lt
             )
             ax.scatter(
                 z_means_x,
@@ -351,7 +384,14 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
                 label=str(this_kwargs - len(conds)),
             )
             if color is not None:
-                colormap_plot(path_save_dir, c, z_means_x, z_means_y, color, conds)
+                colormap_plot(
+                    path_save_dir,
+                    c,
+                    z_means_x,
+                    z_means_y,
+                    color,
+                    conds
+                    )
         try:
             conds.pop()
         except:
@@ -368,14 +408,29 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
 
     for i in range(this_kwargs + 1):
         tmp = kl_per_lt.loc[kl_per_lt["num_conds"] == i]
-        tmp = tmp.sort_values(by="kl_divergence", ascending=False)
+        tmp = tmp.sort_values(
+            by="kl_divergence",
+            ascending=False
+            )
         tmp = tmp.reset_index(drop=True)
         x = tmp.index.values
         y = tmp.iloc[:, 1].values
-        sns.lineplot(ax=ax2, data=tmp, x=tmp.index, y="kl_divergence", label=str(i))
+        sns.lineplot(
+            ax=ax2,
+            data=tmp,
+            x=tmp.index,
+            y="kl_divergence",
+            label=str(i)
+            )
         # ax2.plot(np.log2(x + 1) , y, label = str(i))
         bax.plot(x, y, label=str(i))
-        sns.scatterplot(ax=ax3, data=tmp, x="rcl", y="kl_divergence", label=str(i))
+        sns.scatterplot(
+            ax=ax3,
+            data=tmp,
+            x="rcl",
+            y="kl_divergence",
+            label=str(i)
+            )
 
     ax2.set_xlabel("Latent dimension")
     ax2.set_ylabel("KLD")
@@ -416,7 +471,11 @@ def colormap_plot(
 
     ax = fig.add_subplot(122)
     divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="5%", pad=0.05, title="arc length")
+    cax = divider.append_axes(
+        "right", size="5%",
+        pad=0.05,
+        title="arc length"
+        )
     a = ax.scatter(z_means_x, z_means_y, c=color)
     fig.colorbar(a, cax=cax)
 
@@ -428,8 +487,11 @@ def colormap_plot(
 
 
 def make_plot(
-    df: pd.DataFrame, df2: pd.DataFrame, path_save_dir: Path, args: argparse.Namespace
-) -> None:
+        df: pd.DataFrame,
+        df2: pd.DataFrame,
+        path_save_dir: Path,
+        args: argparse.Namespace
+        ) -> None:
     """Generates and saves training loss plot.
     Parameters
     ----------
@@ -502,7 +564,8 @@ def make_plot(
 
         ax.imshow(
             np.transpose(
-                df["generated_image_any_color_any_digit"].item().cpu(), (1, 2, 0)
+                df["generated_image_any_color_any_digit"].item().cpu(),
+                (1, 2, 0)
             )
         )
         path_save_fig = path_save_dir / Path("generated_image_any_color_any_digit.png")
@@ -512,8 +575,8 @@ def make_plot(
     if "real_image_any_color_any_digit" in df.columns:
         fig, ax = plt.subplots(figsize=(10, 10))
         ax.imshow(
-            np.transpose(df["real_image_any_color_any_digit"].item().cpu(), (1, 2, 0))
-        )
+                np.transpose(df["real_image_any_color_any_digit"].item().cpu(), (1, 2, 0))
+                )
         path_save_fig = path_save_dir / Path("real_image_any_color_any_digit.png")
         fig.savefig(path_save_fig, bbox_inches="tight")
         LOGGER.info(f"Saved: {path_save_fig}")
@@ -522,7 +585,8 @@ def make_plot(
         fig, ax = plt.subplots(figsize=(10, 10))
         ax.imshow(
             np.transpose(
-                df["generated_image_color_red_any_digit"].item().cpu(), (1, 2, 0)
+                df["generated_image_color_red_any_digit"].item().cpu(),
+                (1, 2, 0)
             )
         )
         path_save_fig = path_save_dir / Path("generated_image_color_red_any_digit.png")
