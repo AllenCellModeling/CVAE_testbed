@@ -12,24 +12,40 @@ class CVAE(nn.Module):
     def __init__(self, enc_layers, vae_layers, dec_layers, activation_last=None):
         super(CVAE, self).__init__()
 
-        self.encoder_net = DenseBlock(enc_layers)
+        layers_enc = []
+        for block in enc_layers:
+            layers_enc.append(DenseBlock(block))
 
-        n_enc = np.sum(enc_layers)
-        n_vae = np.sum(vae_layers)
-        n_dec = np.sum(dec_layers[0:-1])
+        self.encoder_net = nn.Sequential(*layers_enc)
 
-        self.mu = nn.Sequential(
-            DenseBlock([n_enc] + vae_layers), nn.Linear(n_enc + n_vae, vae_layers[-1])
-        )
-        self.log_var = nn.Sequential(
-            DenseBlock([n_enc] + vae_layers), nn.Linear(n_enc + n_vae, vae_layers[-1])
-        )
+        layers_mu = []
+        layers_log_var = []
+        for i, block in enumerate(vae_layers):
+            if (i + 1) == len(vae_layers):
+                layers_mu.append(
+                    DenseBlock(block, activation_last=False, bn_last=False)
+                )
+                layers_log_var.append(
+                    DenseBlock(block, activation_last=False, bn_last=False)
+                )
+            else:
+                layers_mu.append(DenseBlock(block))
+                layers_log_var.append(DenseBlock(block))
 
-        self.decoder_net = nn.Sequential(
-            DenseBlock(dec_layers[0:-1]),
-            nn.Linear(n_dec, dec_layers[-1], vae_layers[-1]),
-            get_activation(activation_last),
-        )
+        self.mu = nn.Sequential(*layers_mu)
+        self.log_var = nn.Sequential(*layers_log_var)
+
+        layers_dec = []
+        for i, block in enumerate(dec_layers):
+            if (i + 1) == len(dec_layers):
+                layers_dec.append(
+                    DenseBlock(block, activation_last=False, bn_last=False)
+                )
+                layers_dec.append(get_activation(activation_last))
+            else:
+                layers_dec.append(DenseBlock(block))
+
+        self.decoder_net = nn.Sequential(*layers_dec)
 
         self.apply(weight_init)
 

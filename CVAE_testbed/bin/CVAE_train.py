@@ -138,9 +138,14 @@ def get_model(model_fn, model_kwargs: Optional[Dict] = None) -> nn.Module:
     try:
         return model_fn(**model_kwargs)
     except:
-        a = dict([(key, value) for key, value in model_kwargs.items() if key != "sklearn_data"])
+        a = dict(
+            [
+                (key, value)
+                for key, value in model_kwargs.items()
+                if key != "sklearn_data"
+            ]
+        )
         return model_fn(**a)
-
 
 def colorbar(mappable):
     ax = mappable.axes

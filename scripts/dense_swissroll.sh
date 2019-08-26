@@ -9,4 +9,4 @@ CVAE_train \
     --data_type 'synthetic' \
     --dataloader CVAE_testbed.datasets.swiss_roll.SwissRoll \
     --loss_fn CVAE_testbed.losses.ELBO.synthetic_loss_no_mask \
-    --lr 0.0005
+    --lr 0.001
