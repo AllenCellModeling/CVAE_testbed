@@ -1,26 +1,35 @@
+import numpy as np
+
 import torch
 import torch.nn as nn
 
 from CVAE_testbed.utils import weight_init
-
-# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-# transforms = transforms.Compose([transforms.ToTensor()])
-
-from ..layers import ResidualBlock
+from ..layers import DenseBlock, get_activation
 
 
 class CVAE(nn.Module):
-    def __init__(self, enc_layers, vae_layers, dec_layers, activation_last=False):
+    # Linear densenet implementation
+    def __init__(self, enc_layers, vae_layers, dec_layers, activation_last=None):
         super(CVAE, self).__init__()
 
-        self.encoder_net = ResidualBlock(enc_layers)
+        self.encoder_net = DenseBlock(enc_layers)
 
-        self.mu = ResidualBlock([enc_layers[-1]] + vae_layers, activation_last=False)
-        self.log_var = ResidualBlock(
-            [enc_layers[-1]] + vae_layers, activation_last=False
+        n_enc = np.sum(enc_layers)
+        n_vae = np.sum(vae_layers)
+        n_dec = np.sum(dec_layers[0:-1])
+
+        self.mu = nn.Sequential(
+            DenseBlock([n_enc] + vae_layers), nn.Linear(n_enc + n_vae, vae_layers[-1])
+        )
+        self.log_var = nn.Sequential(
+            DenseBlock([n_enc] + vae_layers), nn.Linear(n_enc + n_vae, vae_layers[-1])
         )
 
-        self.decoder_net = ResidualBlock(dec_layers, activation_last=activation_last)
+        self.decoder_net = nn.Sequential(
+            DenseBlock(dec_layers[0:-1]),
+            nn.Linear(n_dec, dec_layers[-1], vae_layers[-1]),
+            get_activation(activation_last),
+        )
 
         self.apply(weight_init)
 
