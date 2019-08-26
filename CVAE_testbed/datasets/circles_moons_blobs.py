@@ -34,6 +34,8 @@ class CirclesMoonsBlobs(Dataset):
                 X = torch.from_numpy(datasets.make_blobs(n_samples=m, random_state=8)[0]).float()
             elif model_kwargs['sklearn_data'] == 'moons':
                 X = torch.from_numpy(datasets.make_moons(n_samples=m, noise=.05)[0]).float()
+            elif model_kwargs['sklearn_data'] == 's_curve':
+                X = torch.from_numpy(datasets.make_s_curve(n_samples=m, noise=0.05)[0]).float()
             else:
                 break
 
@@ -50,7 +52,7 @@ class CirclesMoonsBlobs(Dataset):
                 while count == 0:
                     C_mask = torch.zeros(C.shape).bernoulli_(0.5)
                     # 3 here refers to 3 dimensions in swiss roll
-                    if len(set([i.item() for i in torch.sum(C_mask, dim = 1)])) == 2 + 1:
+                    if len(set([i.item() for i in torch.sum(C_mask, dim = 1)])) == X.size()[-1] + 1:
                         count = 1 
             else:
                 C_mask = torch.zeros(C.shape).bernoulli_(0)
@@ -61,11 +63,11 @@ class CirclesMoonsBlobs(Dataset):
             C = torch.cat([C.float(), C_indicator.float()], 1)
 
             # 4 here is number of dimensions in swiss roll
-            X = X.view([1, -1, 2])
-            C = C.view([1, -1, 2*2])
+            X = X.view([1, -1, X.size()[-1]])
+            C = C.view([1, -1, X.size()[-1]*2])
 
             # Sum up
-            conds = C[:,:,2:].sum(2)
+            conds = C[:,:,X.size()[-1]:].sum(2)
             Batches_X = torch.cat([Batches_X, X], 0)
             Batches_C = torch.cat([Batches_C, C], 0)
             Batches_conds = torch.cat([Batches_conds, conds], 0)
