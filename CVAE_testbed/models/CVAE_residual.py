@@ -3,7 +3,7 @@ import torch.nn as nn
 
 from CVAE_testbed.utils import weight_init
 
-from ..layers import ResidualBlock
+from ..layers import ResidualLayer
 
 
 class CVAE(nn.Module):
@@ -19,13 +19,13 @@ class CVAE(nn.Module):
         # encoder_net = nn.Sequential()
         for j, (i, k) in enumerate(zip(enc_layers[0::1], enc_layers[1::1])):
             if j == 0:
-                encoder_layers.append(ResidualBlock(i + self.cdim, k))
+                encoder_layers.append(ResidualLayer(i + self.cdim, k))
             #     encoder_layers.append(nn.ReLU())
             elif j == len(enc_layers) - 2:
-                self.fc1 = ResidualBlock(i, k, activation=None)
-                self.fc2 = ResidualBlock(i, k, activation=None)
+                self.fc1 = ResidualLayer(i, k, activation=None)
+                self.fc2 = ResidualLayer(i, k, activation=None)
             else:
-                encoder_layers.append(ResidualBlock(i, k))
+                encoder_layers.append(ResidualLayer(i, k))
 
         self.encoder_net = nn.Sequential(*encoder_layers)
         # decoder part
@@ -33,12 +33,12 @@ class CVAE(nn.Module):
         # decoder_net = nn.Sequential()
         for j, (i, k) in enumerate(zip(dec_layers[0::1], dec_layers[1::1])):
             if j == 0:
-                decoder_layers.append(ResidualBlock(i + self.cdim, k))
+                decoder_layers.append(ResidualLayer(i + self.cdim, k))
                 # decoder_layers.append(nn.ReLU())
             elif j == len(dec_layers) - 2:
-                decoder_layers.append(ResidualBlock(i, k, activation=None))
+                decoder_layers.append(ResidualLayer(i, k, activation=None))
             else:
-                decoder_layers.append(ResidualBlock(i, k))
+                decoder_layers.append(ResidualLayer(i, k))
 
         self.decoder_net = nn.Sequential(*decoder_layers)
 

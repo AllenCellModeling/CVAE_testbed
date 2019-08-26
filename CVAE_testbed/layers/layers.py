@@ -1,18 +1,47 @@
+import torch
 import torch.nn as nn
 
+import numpy as np
 
-class ResidualBlock(nn.Module):
+
+def get_activation(activation):
+    if activation == "relu":
+        activation = nn.ReLU()
+    elif activation == "sigmoid":
+        activation = nn.Sigmoid()
+    elif (activation is None) or (activation == "none"):
+        activation = nn.Sequential()
+
+    return activation
+
+
+class BasicLayer(nn.Module):
+    # takes the input, passes through a layer, and concatenates to the input
+    def __init__(self, n_in, n_out, bn=True, activation="relu"):
+        super(BasicLayer, self).__init__()
+
+        layers = []
+
+        layers.append(nn.Linear(n_in, n_out)),
+        if bn:
+            layers.append(nn.BatchNorm1d(n_out))
+
+        layers.append(get_activation(activation))
+
+        self.main = nn.Sequential(*layers)
+
+    def forward(self, x):
+        return self.main(x)
+
+
+class ResidualLayer(nn.Module):
     def __init__(self, n_in, n_out, n_bottleneck=32, bn=True, activation="relu"):
-        super(ResidualBlock, self).__init__()
+        super(ResidualLayer, self).__init__()
 
         self.n_in = n_in
         self.n_out = n_out
-        if activation == "relu":
-            self.activation = nn.ReLU()
-        elif activation == "sigmoid":
-            self.activation = nn.Sigmoid()
-        elif (activation is None) or (activation == "none"):
-            self.activation = nn.Sequential()
+
+        self.activation = get_activation(activation)
 
         main_layer = []
         main_layer.append(nn.Linear(n_in, n_bottleneck))
@@ -38,27 +67,66 @@ class ResidualBlock(nn.Module):
         return x_out
 
 
-class ResidualGroup(nn.Module):
+class ResidualBlock(nn.Module):
     def __init__(
         self, layers_list, bottleneck_list=None, activation="relu", activation_last=True
     ):
-        super(ResidualGroup, self).__init__()
+        super(ResidualBlock, self).__init__()
 
         if bottleneck_list is None:
             bottleneck_list = [32] * (len(layers_list) - 1)
 
-        layers = list()
+        layers = []
 
         for i, (n_in, n_out, bottleneck) in enumerate(
             zip(layers_list[0::1], layers_list[1::1], bottleneck_list)
         ):
-
             if (i + 1 == len(bottleneck_list)) & ~activation_last:
-                layers.append(ResidualBlock(n_in, n_out, bottleneck, activation=None))
+                layers.append(ResidualLayer(n_in, n_out, bottleneck, activation=None))
             else:
                 layers.append(
-                    ResidualBlock(n_in, n_out, bottleneck, activation=activation)
+                    ResidualLayer(n_in, n_out, bottleneck, activation=activation)
                 )
+
+        self.main = nn.Sequential(*layers)
+
+    def forward(self, x):
+        return self.main(x)
+
+
+class ConcatLayer(nn.Module):
+    # takes the input, passes through a layer, and concatenates to the input
+    def __init__(self, n_in, n_out, bn=True, activation="relu"):
+        super(ConcatLayer, self).__init__()
+
+        layers = []
+
+        layers.append(nn.Linear(n_in, n_out)),
+        if bn:
+            layers.append(nn.BatchNorm1d(n_out))
+
+        layers.append(get_activation(activation))
+
+        self.main = nn.Sequential(*layers)
+
+    def forward(self, x):
+        return torch.cat([self.main(x), x], 1)
+
+
+class DenseBlock(nn.Module):
+    def __init__(self, layers_list, activation="relu", activation_last=True):
+        super(DenseBlock, self).__init__()
+
+        layers = []
+
+        for i, (n_in, n_out) in enumerate(
+            zip(np.cumsum(layers_list)[0::1], layers_list[1::1])
+        ):
+
+            if (i + 1 == (len(layers_list) - 1)) & ~activation_last:
+                layers.append(ConcatLayer(n_in, n_out, activation=None))
+            else:
+                layers.append(ConcatLayer(n_in, n_out, activation=activation))
 
         self.main = nn.Sequential(*layers)
 
