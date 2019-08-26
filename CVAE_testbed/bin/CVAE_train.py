@@ -30,14 +30,38 @@ def get_args():
     """
 
     def load_synthetic(x):
-        with open(x) as fp:
-            a = json.load(fp)
-        return a
+        try:
+            with open(x) as fp:
+                a = json.load(fp)
+            return a
+        except:
+            o = json.loads(x)
+            return o
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--batch_size", type=int, default=5, help="Mini-batch size")
     parser.add_argument(
-        "--num_batches", type=int, default=10, help="Number of mini-batches"
+        "--batch_size", 
+        type=int, 
+        default=5, 
+        help="Mini-batch size"
+    )
+    parser.add_argument(
+        "--num_batches",
+        type=int,
+        default=10,
+        help="Number of mini-batches"
+    )
+    parser.add_argument(
+        "--beta_vae",
+        type=int,
+        default=1,
+        help="Beta parameter in beta*(RCL + KLD) loss"
+    )
+    parser.add_argument(
+        "--C_vae",
+        type=int,
+        default=0,
+        help="C parameter in RCL + (KLD - C) loss"
     )
     parser.add_argument(
         "--dataloader",
@@ -50,7 +74,11 @@ def get_args():
         default="CVAE_testbed.losses.ELBO.synthetic_loss",
         help="loss_function",
     )
-    parser.add_argument("--lr", type=float, default=0.001, help="Learning rate")
+    parser.add_argument(
+        "--lr", 
+        type=float, 
+        default=0.001, 
+        help="Learning rate")
     parser.add_argument(
         "--model_fn",
         default="CVAE_testbed.models.CVAE_baseline.CVAE",
@@ -80,10 +108,6 @@ def get_args():
     )
     args = parser.parse_args()
 
-    # args.path_save_dir = (
-    #     args.path_save_dir or str(
-    #         Path('outputs', datetime.datetime.today().strftime('%Y:%m:%d:%H:%M:%S') )
-    #     ))
     args.path_save_dir = args.path_save_dir + str(
         datetime.datetime.today().strftime("%Y:%m:%d:%H:%M:%S")
     )
@@ -122,7 +146,6 @@ def get_model(model_fn, model_kwargs: Optional[Dict] = None) -> nn.Module:
             ]
         )
         return model_fn(**a)
-
 
 def colorbar(mappable):
     ax = mappable.axes
@@ -270,7 +293,6 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
     vis_enc = str_to_object(
         "CVAE_testbed.metrics.visualize_encoder.visualize_encoder_synthetic"
     )
-    kl_per_dim = str_to_object("CVAE_testbed.metrics.visualize_encoder.get_sorted_klds")
     conds = [i for i in range(args.model_kwargs["dec_layers"][-1])]
     fig, (ax1, ax, ax2, ax3) = plt.subplots(1, 4, figsize=(7 * 4, 5))
     fig2 = plt.figure(figsize=(12, 10))
@@ -294,7 +316,7 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
     this_dataloader = make_data(
         1, args.batch_size * 10, args.model_kwargs, shuffle=False
     )
-    c, d, ind, _ = this_dataloader.get_all_items()
+    c, d, _, _ = this_dataloader.get_all_items()
 
     conds = [i for i in range(this_kwargs)]
     if args.dataloader == "CVAE_testbed.datasets.swiss_roll.SwissRoll":
@@ -305,7 +327,7 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
     for i in range(len(conds) + 1):
         # print(conds, i)
         if i == 0:
-            z_means_x, z_means_y, kl_per_lt, z_var_x, z_var_y = vis_enc(
+            z_means_x, z_means_y, kl_per_lt, _, _ = vis_enc(
                 args, model, conds, c[0, :].clone(), d[0, :].clone(), kl_per_lt=None
             )
             ax.scatter(
@@ -318,7 +340,7 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
             if color is not None:
                 colormap_plot(path_save_dir, c, z_means_x, z_means_y, color, conds)
         else:
-            z_means_x, z_means_y, kl_per_lt, z_var_x, z_var_y = vis_enc(
+            z_means_x, z_means_y, kl_per_lt, _, _ = vis_enc(
                 args, model, conds, c[0, :].clone(), d[0, :].clone(), kl_per_lt
             )
             ax.scatter(
@@ -560,4 +582,3 @@ def make_plot(
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     train_model()
-
