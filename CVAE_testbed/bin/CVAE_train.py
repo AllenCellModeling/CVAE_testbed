@@ -114,8 +114,15 @@ def get_model(model_fn, model_kwargs: Optional[Dict] = None) -> nn.Module:
     try:
         return model_fn(**model_kwargs)
     except:
-        a = dict([(key, value) for key,value in model_kwargs.items() if key != "sklearn_data"])
+        a = dict(
+            [
+                (key, value)
+                for key, value in model_kwargs.items()
+                if key != "sklearn_data"
+            ]
+        )
         return model_fn(**a)
+
 
 def colorbar(mappable):
     ax = mappable.axes
@@ -280,7 +287,6 @@ def make_plot_encoding(args: argparse.Namespace, model, df: pd.DataFrame) -> Non
         ax1.set_ylim([0, df.total_test_losses.quantile(0.95)])
         ax1.legend(["Train loss", "Test loss"])
     ax1.set_title("Loss vs epoch")
-
 
     this_kwargs = args.model_kwargs["dec_layers"][-1]
 

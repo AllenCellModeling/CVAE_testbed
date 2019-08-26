@@ -114,17 +114,26 @@ class ConcatLayer(nn.Module):
 
 
 class DenseBlock(nn.Module):
-    def __init__(self, layers_list, activation="relu", activation_last=True):
+    # dense block:  outputs from each layer go to inputs of each subsequent layer, normal linear layer on the last element
+    def __init__(
+        self, layers_list, activation="relu", activation_last=True, bn_last=True
+    ):
         super(DenseBlock, self).__init__()
 
-        layers = []
+        if ~activation_last:
+            activation_last = None
+        else:
+            activation_last = activation
 
+        layers = []
         for i, (n_in, n_out) in enumerate(
             zip(np.cumsum(layers_list)[0::1], layers_list[1::1])
         ):
 
-            if (i + 1 == (len(layers_list) - 1)) & ~activation_last:
-                layers.append(ConcatLayer(n_in, n_out, activation=None))
+            if i + 1 == (len(layers_list) - 1):
+                layers.append(
+                    BasicLayer(n_in, n_out, activation=activation_last, bn=bn_last)
+                )
             else:
                 layers.append(ConcatLayer(n_in, n_out, activation=activation))
 
