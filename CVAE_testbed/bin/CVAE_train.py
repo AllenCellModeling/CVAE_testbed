@@ -312,7 +312,10 @@ def make_plot_encoding(
     vis_enc = str_to_object(
         "CVAE_testbed.metrics.visualize_encoder.visualize_encoder_synthetic"
     )
-    conds = [i for i in range(args.model_kwargs["x_dim"])]
+    try:
+        conds = [i for i in range(args.model_kwargs["dec_layers"][-1][-1])]
+    except:
+        conds = [i for i in range(args.model_kwargs["dec_layers"][-1])]
     fig, (ax1, ax, ax2, ax3) = plt.subplots(1, 4, figsize=(7 * 4, 5))
     fig2 = plt.figure(figsize=(12, 10))
     bax = brokenaxes(xlims=((0, 8), (60, 64)), hspace=0.15)
@@ -329,8 +332,10 @@ def make_plot_encoding(
         ax1.legend(["Train loss", "Test loss"])
     ax1.set_title("Loss vs epoch")
 
-    this_kwargs = args.model_kwargs["x_dim"]
-
+    try:
+        this_kwargs = args.model_kwargs["dec_layers"][-1][-1]
+    except:
+        this_kwargs = args.model_kwargs["dec_layers"][-1]
     make_data = str_to_object(args.dataloader)
     this_dataloader = make_data(
         1, args.batch_size * 10, args.model_kwargs, shuffle=False
@@ -467,7 +472,10 @@ def colormap_plot(
 
     ax1 = fig.add_subplot(121, projection="3d")
     swiss_roll = swiss_roll[0, :]
-    ax1.scatter(swiss_roll[:, 0], swiss_roll[:, 1], swiss_roll[:, 2], c=color)
+    try:
+        ax1.scatter(swiss_roll[:, 0], swiss_roll[:, 1], swiss_roll[:, 2], c=color)
+    except:
+        ax1.scatter(swiss_roll[:, 0], swiss_roll[:, 1], c=color)
 
     ax = fig.add_subplot(122)
     divider = make_axes_locatable(ax)
