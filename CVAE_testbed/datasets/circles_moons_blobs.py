@@ -28,16 +28,16 @@ class CirclesMoonsBlobs(Dataset):
             # create dataset
             if model_kwargs['sklearn_data'] == 'circles':
                 X = torch.from_numpy(
-                    datasets.make_circles(n_samples=m, factor=.5, noise=.05)[0]
+                    datasets.make_circles(n_samples=m, factor=.5, noise=0, random_state=8)[0]
                     ).float()
             elif model_kwargs['sklearn_data'] == 'blobs':
                 X = torch.from_numpy(
                     datasets.make_blobs(n_samples=m, random_state=8)[0]
                     ).float()
             elif model_kwargs['sklearn_data'] == 'moons':
-                X = torch.from_numpy(datasets.make_moons(n_samples=m, noise=.05)[0]).float()
+                X = torch.from_numpy(datasets.make_moons(n_samples=m, noise=0, random_state=8)[0]).float()
             elif model_kwargs['sklearn_data'] == 's_curve':
-                X = torch.from_numpy(datasets.make_s_curve(n_samples=m, noise=0.05)[0]).float()
+                X = torch.from_numpy(datasets.make_s_curve(n_samples=m, noise=0, random_state=8)[0]).float()
             else:
                 break
 
@@ -54,8 +54,9 @@ class CirclesMoonsBlobs(Dataset):
                 while count == 0:
                     C_mask = torch.zeros(C.shape).bernoulli_(0.5)
                     # 3 here refers to 3 dimensions in swiss roll
-                    if len(set([i.item() for i in torch.sum(C_mask, dim=1)])) == X.size()[-1] + 1:
-                        count=1 
+                    count = 1
+                    # if len(set([i.item() for i in torch.sum(C_mask, dim=1)])) == X.size()[-1] + 1:
+                    #     count=1 
             else:
                 C_mask = torch.zeros(C.shape).bernoulli_(0)
 

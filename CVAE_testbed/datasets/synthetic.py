@@ -37,8 +37,9 @@ class SyntheticDataset(Dataset):
             if self.shuffle is True:
                 while count == 0:
                     C_mask = torch.zeros(C.shape).bernoulli_(0.5)
-                    if len(set([i.item() for i in torch.sum(C_mask, dim = 1)])) == self.model_kwargs['x_dim'] + 1:
-                        count = 1 
+                    count = 1
+                    # if len(set([i.item() for i in torch.sum(C_mask, dim = 1)])) == self.model_kwargs['x_dim'] + 1:
+                    #     count = 1 
             else:
                 C_mask = torch.zeros(C.shape).bernoulli_(0)
 

@@ -25,12 +25,23 @@ def visualize_encoder_synthetic(args, model, conds, c, d, kl_per_lt=None):
             tmp1[:, kk], tmp2[:, kk] = 0, 0
         cond_d = torch.cat((tmp1, tmp2), 1)
 
-        recon_batch, z_means, log_var = model(
-            c.cuda(args.gpu_id), cond_d.cuda(args.gpu_id)
-        )
+        # Run 10 times for resampling
+        my_recon_list, my_z_means_list, my_log_var_list = [], [], []
+        for resample in range(10):
+            recon_batch, z_means, log_var = model(
+                c.cuda(args.gpu_id), cond_d.cuda(args.gpu_id)
+            )
+            my_recon_list.append(recon_batch)
+            my_z_means_list.append(z_means)
+            my_log_var_list.append(log_var)
+
+        recon_batch = torch.mean(torch.stack(my_recon_list), dim=0)
+        z_means = torch.mean(torch.stack(my_z_means_list), dim=0)
+        log_var = torch.mean(torch.stack(my_log_var_list), dim=0)
 
         for ii in range(z_means.size()[-1]):
             loss_fn = str_to_object(args.loss_fn)
+
             _, rcl_per_lt_temp, kl_per_lt_temp, _, _ = loss_fn(
                 c.cuda(args.gpu_id),
                 recon_batch.cuda(args.gpu_id),
