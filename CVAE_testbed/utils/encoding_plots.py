@@ -12,8 +12,11 @@ from CVAE_testbed.utils import str_to_object
 LOGGER = logging.getLogger(__name__)
 
 def make_plot_encoding(
-        args: argparse.Namespace, model, df: pd.DataFrame
+        args: argparse.Namespace, model, df: pd.DataFrame, c, d, save=True
         ) -> None:
+    """
+    c and d are X_test and C_test
+    """
     sns.set_context("talk")
     path_save_dir = Path(args.path_save_dir)
     vis_enc = str_to_object(
@@ -34,10 +37,13 @@ def make_plot_encoding(
     sns.lineplot(ax=ax, data = df, x="epoch", y="total_test_ELBO")
     ax.set_ylim([0, df.total_test_ELBO.quantile(0.95)])
     ax.legend(["Train loss", "Test loss"])
-    ax.set_title("ELBO vs epoch")
-    path_save_fig = path_save_dir / Path("ELBO.png")
-    fig.savefig(path_save_fig, bbox_inches="tight")
-    LOGGER.info(f"Saved: {path_save_fig}")
+    ax.set_ylabel('Loss')
+    ax.set_title("Actual ELBO (no beta) vs epoch")
+
+    if save is True:
+        path_save_fig = path_save_dir / Path("ELBO.png")
+        fig.savefig(path_save_fig, bbox_inches="tight")
+        LOGGER.info(f"Saved: {path_save_fig}")
 
     fig, (ax1, ax, ax2, ax3) = plt.subplots(1, 4, figsize=(7 * 4, 5))
     fig2 = plt.figure(figsize=(12, 10))
@@ -53,7 +59,7 @@ def make_plot_encoding(
         ax1.set_ylabel("Loss")
         ax1.set_ylim([0, df.total_test_losses.quantile(0.95)])
         ax1.legend(["Train loss", "Test loss"])
-    ax1.set_title("Loss vs epoch")
+    ax1.set_title("ELBO (beta*KLD + RCL) vs epoch")
 
     try:
         this_kwargs = args.model_kwargs["dec_layers"][-1][-1]
@@ -61,14 +67,17 @@ def make_plot_encoding(
         this_kwargs = args.model_kwargs["dec_layers"][-1]
     make_data = str_to_object(args.dataloader)
     this_dataloader = make_data(
-        1, args.batch_size * 10, args.model_kwargs, shuffle=False
+        1, args.batch_size*4, args.model_kwargs, shuffle=False
     )
-    c, d, _, _ = this_dataloader.get_all_items()
+    if args.data_type == 'aics_features':
+        pass
+    else:
+        c, d, _, _ = this_dataloader.get_all_items()
     print('inside encoding', c[0,:].size(), d[0,:].size())
 
     conds = [i for i in range(this_kwargs)]
-    if len(conds) > 30:
-        conds = [i for i in conds if i%30 == 0]
+    # if len(conds) > 20:
+    #     conds = [i for i in conds if i%20 == 0]
 
     if args.post_plot_kwargs["latent_space_colorbar"] == "yes":
         color = this_dataloader.get_color()
@@ -78,13 +87,14 @@ def make_plot_encoding(
     for i in range(len(conds) + 1):
         print('inside main plot encoding', i, len(conds) + 1)
         if i == 0:
-            z_means_x, z_means_y, kl_per_lt, _, _ = vis_enc(
+            z_means_x, z_means_y, kl_per_lt, _, _, kl_vs_rcl = vis_enc(
                 args,
                 model,
                 conds,
-                c[0, :].clone(),
-                d[0, :].clone(),
-                kl_per_lt=None
+                c[-1, :].clone(),
+                d[-1, :].clone(),
+                kl_per_lt=None,
+                kl_vs_rcl=None
             )
             ax.scatter(
                 z_means_x,
@@ -100,13 +110,14 @@ def make_plot_encoding(
                     z_means_y, color,
                     conds)
         else:
-            z_means_x, z_means_y, kl_per_lt, _, _ = vis_enc(
+            z_means_x, z_means_y, kl_per_lt, _, _, kl_vs_rcl = vis_enc(
                 args,
                 model,
                 conds,
-                c[0, :].clone(),
-                d[0, :].clone(),
-                kl_per_lt
+                c[-1, :].clone(),
+                d[-1, :].clone(),
+                kl_per_lt,
+                kl_vs_rcl
             )
             ax.scatter(
                 z_means_x,
@@ -128,22 +139,28 @@ def make_plot_encoding(
             conds.pop()
         except:
             pass
-    try:
-        path_csv = path_save_dir / Path("visualize_encoding.csv")
-        kl_per_lt = pd.DataFrame(kl_per_lt)
+
+    kl_per_lt = pd.DataFrame(kl_per_lt)
+    kl_vs_rcl = pd.DataFrame(kl_vs_rcl)
+
+    if save is True:
+        path_csv = path_save_dir / Path("encoding_kl_per_lt.csv")  
         kl_per_lt.to_csv(path_csv)
         LOGGER.info(f"Saved: {path_csv}")
-    except:
-        pass
+        path_csv = path_save_dir / Path("encoding_kl_vs_rcl.csv")
+        kl_vs_rcl.to_csv(path_csv)
+        LOGGER.info(f"Saved: {path_csv}")
+
     ax.set_title("Latent space")
     ax.legend()
 
     conds = [i for i in range(this_kwargs)]
-    if len(conds) > 30:
-        conds = [i for i in conds if i%30 == 0]
+    # if len(conds) > 20:
+    #     conds = [i for i in conds if i%20 == 0]
 
     for i in range(len(conds) + 1):
         tmp = kl_per_lt.loc[kl_per_lt["num_conds"] == c.size()[-1] - len(conds)]
+        tmp_2 = kl_vs_rcl.loc[kl_vs_rcl["num_conds"] == c.size()[-1] - len(conds)]
         tmp = tmp.sort_values(
             by="kl_divergence",
             ascending=False
@@ -160,7 +177,7 @@ def make_plot_encoding(
             legend='brief'
             )
         bax.plot(x, y, label=str(i))
-        ax3.scatter(tmp['rcl'].mean(), tmp['kl_divergence'].mean(), label=str(i))
+        ax3.scatter(tmp_2['RCL'].mean(), tmp_2['KLD'].mean(), label=str(i))
         # sns.scatterplot(
         #     ax=ax3,
         #     data=tmp,
@@ -185,19 +202,15 @@ def make_plot_encoding(
     bax.set_ylabel("KLD")
     bax.set_title("KLD per latent dim")
 
-    try:
+    if save is True:
         path_save_fig = path_save_dir / Path("encoding_test_plots.png")
         fig.savefig(path_save_fig, bbox_inches="tight")
         LOGGER.info(f"Saved: {path_save_fig}")
-    except:
-        pass
 
-    try:
+    if save is True:
         path_save_fig = path_save_dir / Path("brokenaxes_KLD_per_dim.png")
         fig2.savefig(path_save_fig, bbox_inches="tight")
         LOGGER.info(f"Saved: {path_save_fig}")
-    except:
-        pass
 
 
 def colormap_plot(

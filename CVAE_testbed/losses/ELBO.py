@@ -7,7 +7,7 @@ def calculate_loss(x, reconstructed_x, mean, log_var):
     # reconstruction loss
     RCL = F.binary_cross_entropy(reconstructed_x, x, size_average=False)
     # kl divergence loss
-    KLD = -0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp())                       
+    KLD = -0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp())        
     return RCL + KLD, RCL, KLD
 
 
@@ -22,13 +22,13 @@ def synthetic_loss(x, reconstructed_x, mean, log_var, args):
     loss_per_element = torch.nn.MSELoss(
         size_average=False, reduce=False)
 
-    # if x is masked, find indices in x 
+    # if x is masked, find indices in x
     # that are 0 and set reconstructed x to 0 as well
     indices = x == 0
     reconstructed_x[indices] = 0
 
     RCL = loss(reconstructed_x, x)
-    RCL_per_element = loss_per_element(reconstructed_x, x)  
+    RCL_per_element = loss_per_element(reconstructed_x, x)
     KLD = -0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp())
     KLD_per_element = -0.5 * (1 + log_var - mean.pow(2) - log_var.exp())
 
@@ -45,7 +45,7 @@ def synthetic_loss_no_mask(x, reconstructed_x, mean, log_var, args):
     loss_per_element = torch.nn.MSELoss(size_average=False, reduce=False)
 
     RCL = loss(reconstructed_x, x)
-    RCL_per_element = loss_per_element(reconstructed_x, x)  
+    RCL_per_element = loss_per_element(reconstructed_x, x)
     KLD = -0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp())
     KLD_per_element = -0.5 * (1 + log_var - mean.pow(2) - log_var.exp())
 
@@ -54,18 +54,21 @@ def synthetic_loss_no_mask(x, reconstructed_x, mean, log_var, args):
 
 def combined_loss(x, reconstructed_x, mean, log_var, args):
     """
-    MSE loss for reconstruction, KLD loss as per VAE. 
+    MSE loss for reconstruction, KLD loss as per VAE.
     Also want to output dimension (element) wise RCL and KLD
     """
     # First, binary data
     loss1 = torch.nn.BCEWithLogitsLoss(size_average=False)
-    loss1_per_element = torch.nn.BCEWithLogitsLoss(size_average=False, reduce=False)
+    loss1_per_element = torch.nn.BCEWithLogitsLoss(
+                                                    size_average=False,
+                                                    reduce=False
+                                                  )
     binary_range = args.binary_real_one_hot_parameters['binary_range']
     reconstructed_x1 = reconstructed_x[:, binary_range[0]: binary_range[1]]
-    
+ 
     x1 = x[:, binary_range[0]: binary_range[1]]
     RCL1 = loss1(reconstructed_x1, x1)
-    RCL1_per_element = loss1_per_element(reconstructed_x1, x1)  
+    RCL1_per_element = loss1_per_element(reconstructed_x1, x1)
 
     # Next, real data
     loss2 = torch.nn.MSELoss(size_average=False)
@@ -79,7 +82,11 @@ def combined_loss(x, reconstructed_x, mean, log_var, args):
 
     # Next, one-hot data
     loss3 = torch.nn.CrossEntropyLoss(size_average=True)
-    loss3_per_element = torch.nn.CrossEntropyLoss(size_average=True, reduce=False)
+    loss3_per_element = torch.nn.CrossEntropyLoss(
+                                                    size_average=True,
+                                                    reduce=False
+                                                 )
+
     one_hot_range = args.binary_real_one_hot_parameters['one_hot_range']
     reconstructed_x3 = reconstructed_x[:, one_hot_range[0]: one_hot_range[1]]
     x3 = x[:, one_hot_range[0]: one_hot_range[1]]
@@ -107,18 +114,32 @@ def combined_loss(x, reconstructed_x, mean, log_var, args):
     KLD_per_element = -0.5 * (1 + log_var - mean.pow(2) - log_var.exp())
     RCL = RCL1 + RCL2 + RCL3_1 + RCL3_2 + RCL3_3
 
-    RCL_per_element = torch.cat((RCL1_per_element,
-        RCL2_per_element,
-        RCL3_per_element_1.view([-1, 1]),
-        RCL3_per_element_2.view([-1, 1]),
-        RCL3_per_element_3.view([-1, 1])
-        ), 1)
+    RCL_per_element = torch.cat(
+        (
+            RCL1_per_element,
+            RCL2_per_element,
+            RCL3_per_element_1.view([-1, 1]),
+            RCL3_per_element_2.view([-1, 1]),
+            RCL3_per_element_3.view([-1, 1])
+        ),
+        1
+                               )
 
     return RCL + args.beta_vae*KLD, RCL, KLD, RCL_per_element, KLD_per_element
 
 
-def synthetic_loss_baseline_2(z0, z0_logits, z1, z1_prior, z2, z1_post, z2_post, args):
+def synthetic_loss_baseline_2(
+    z0,
+    z0_logits,
+    z1,
+    z1_prior,
+    z2,
+    z1_post,
+    z2_post,
+    args
+                            ):
     """
+    Based on encoding a single bit repo
     MSE loss for reconstruction, KLD loss as per VAE. 
     Also want to output dimension (element) wise RCL and KLD
     """
@@ -128,7 +149,7 @@ def synthetic_loss_baseline_2(z0, z0_logits, z1, z1_prior, z2, z1_post, z2_post,
 
     # First RCL term
     RCL = loss(z0_logits, z0)
-    RCL_per_element = loss_per_element(z0_logits, z0)  
+    RCL_per_element = loss_per_element(z0_logits, z0)
 
     # First KL term
     print(z1_prior[0].size(), z1_post[0].size())
@@ -141,6 +162,5 @@ def synthetic_loss_baseline_2(z0, z0_logits, z1, z1_prior, z2, z1_post, z2_post,
 
     print(KLD1, KLD2, RCL)
     KLD = KLD1 + KLD2
-
 
     return RCL + args.beta_vae*KLD, RCL, KLD, RCL_per_element, KLD_per_element

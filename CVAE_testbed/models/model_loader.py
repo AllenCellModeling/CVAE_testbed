@@ -3,6 +3,7 @@ import pathlib
 from pathlib import Path
 from torch import nn
 import logging
+from CVAE_testbed.models.CVAE_baseline import CVAE
 
 LOGGER = logging.getLogger(__name__)
 
@@ -28,13 +29,15 @@ class ModelLoader:
     
     def load_model(self, path_save_dir):
         """Loads model weights from specified directory"""
+
         if path_save_dir is not None:
             path_weights = path_save_dir / Path('weights.pt')
         else:
             path_weights = self.path_save_dir / Path('weights.pt')
-        model = torch.load(path_weights, map_location='cuda:0')
-        # model.eval()
-        return model
+        # model = torch.load(path_weights, map_location='cuda:0')
+        self.model.load_state_dict(torch.load(path_weights))
+        self.model.eval()
+        return self.model
     
     def load_projection_matrix(self, path_save_dir):
         """Loads model weights from specified directory"""

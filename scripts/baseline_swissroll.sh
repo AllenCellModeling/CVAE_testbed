@@ -1,9 +1,11 @@
 CVAE_train \
-	--gpu_id 0 \
+	--gpu_id 1 \
 	--path_save_dir ./outputs/baseline_results_swissroll/ \
 	--model_fn CVAE_testbed.models.CVAE_baseline.CVAE \
     --model_kwargs baseline_swissroll_kwargs.json \
 	--batch_size 64  \
+    --post_plot_kwargs '{"latent_space_colorbar": "no"}'\
+    --beta_vae 1 \
     --num_batches 500  \
     --n_epochs 30 \
     --data_type 'synthetic' \
