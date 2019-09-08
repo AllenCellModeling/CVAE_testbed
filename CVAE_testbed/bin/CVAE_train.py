@@ -4,21 +4,14 @@ import json
 import time
 from pathlib import Path
 import datetime
-import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 import torch
 from torch import nn, optim
-from brokenaxes import brokenaxes
 
 from typing import Optional, Dict
-import pandas as pd
-import numpy as np
-from mpl_toolkits.mplot3d import Axes3D
 from CVAE_testbed.models.model_loader import ModelLoader
 from CVAE_testbed.utils import str_to_object
-
-import seaborn as sns
 
 LOGGER = logging.getLogger(__name__)
 
@@ -52,9 +45,32 @@ def get_args():
     )
     parser.add_argument(
         "--beta_vae",
-        type=int,
+        type=float,
         default=1,
         help="Beta parameter in beta*(RCL + KLD) loss"
+    )
+    parser.add_argument(
+        "--json_quilt_path",
+        default='/home/ritvik.vasan/test/',
+        help="Path to json files containing quilt features"
+    )
+    parser.add_argument(
+        "--binary_real_one_hot_parameters",
+        type=lambda x: load_synthetic(x),
+        default={
+            "binary_range": [0, 1],
+            "binary_loss": 'BCE',
+            "real_range": [1, 103],
+            "real loss": 'MSE',
+            "one_hot_range": [103, 159],
+            "one_hot_loss": 'NLL'
+        },
+        help="Losses and ranges for binary real and one_hot data",
+    )
+    parser.add_argument(
+        "--config_path",
+        default='/home/ritvik.vasan/config.json',
+        help="Path to config file for Jackson's feature database"
     )
     parser.add_argument(
         "--C_vae",
@@ -98,7 +114,7 @@ def get_args():
         "--post_plot_kwargs",
         type=lambda x: load_synthetic(x),
         default={
-            "latent_space_colorbar": False,
+            "latent_space_colorbar": "no",
         },
         help="Post-hoc plot kwargs",
     )
@@ -152,7 +168,7 @@ def get_model(model_fn, model_kwargs: Optional[Dict] = None) -> nn.Module:
             [
                 (key, value)
                 for key, value in model_kwargs.items()
-                if key != "sklearn_data"
+                if key != "sklearn_data" and key != 'projection_dim'
             ]
         )
         return model_fn(**a)
@@ -195,6 +211,20 @@ def train_model():
         train_iterator, test_iterator = load_data(
             args.batch_size, args.model_kwargs
             )
+    elif args.data_type == "aics_features":
+        load_data = str_to_object(args.dataloader)
+        aics_instance = load_data(
+            args.num_batches,
+            args.batch_size,
+            args.model_kwargs,
+            corr=False,
+            train=True,
+            mask=False,
+        )
+        X_train, C_train, Cond_indices_train = aics_instance.get_train_data()
+        X_test, C_test, Cond_indices_test = aics_instance.get_test_data()
+        print('CVAE train')
+        print(X_train.size(), X_test.size())
     elif args.data_type == "synthetic":
         if "mask_percentage" in args.model_kwargs:
             mask_bool = True
@@ -243,10 +273,18 @@ def train_model():
             ).get_all_items()
 
     model = get_model(args.model_fn, args.model_kwargs).to(device)
-    # print('model', model)
     opt = optim.Adam(model.parameters(), lr=args.lr)
-    # print('optimizer', opt)
     loss_fn = str_to_object(args.loss_fn)
+
+    make_plot_encoding_greedy = str_to_object(
+            "CVAE_testbed.utils.greedy_encoding_plots.make_plot_encoding_greedy"
+            )
+    make_plot_encoding = str_to_object(
+            "CVAE_testbed.utils.encoding_plots.make_plot_encoding"
+            )
+    make_plot = str_to_object(
+            "CVAE_testbed.utils.loss_and_image_plots.make_plot"
+            )
 
     if args.data_type == "mnist":
         run = str_to_object(
@@ -264,10 +302,9 @@ def train_model():
             args.n_epochs,
             args.model_kwargs,
         )
-    elif args.data_type == "synthetic":
-        # run = str_to_object('run_models.run_synthetic.run_synthetic')
+    elif args.data_type == "synthetic" or args.data_type == 'aics_features':
         run = str_to_object(
-            "CVAE_testbed.run_models.run_synthetic.run_synthetic"
+            "CVAE_testbed.run_models.run_synthetic_test.run_synthetic"
             )
         stats, stats_per_dim = run(
             args,
@@ -285,12 +322,14 @@ def train_model():
             args.gpu_id,
             args.model_kwargs,
         )
-        make_plot_encoding(args, model, stats)
+        if args.data_type == 'aics_features' or args.data_type == 'synthetic':
+            make_plot_encoding_greedy(args, model, stats)
+            make_plot_encoding(args, model, stats)
+        else:
+            make_plot_encoding(args, model, stats)
 
-    # print(model, opt)
     this_model = ModelLoader(model, path_save_dir)
     this_model.save_model()
-    # save_model(model, path_save_dir)
     path_csv = path_save_dir / Path("costs.csv")
     stats.to_csv(path_csv)
     LOGGER.info(f"Saved: {path_csv}")
@@ -302,354 +341,6 @@ def train_model():
     make_plot(stats, stats_per_dim, path_save_dir, args)
     LOGGER.info(f"Elapsed time: {time.time() - tic:.2f}")
     print("saved:", path_save_dir)
-
-
-def make_plot_encoding(
-        args: argparse.Namespace, model, df: pd.DataFrame
-        ) -> None:
-    sns.set_context("talk")
-    path_save_dir = Path(args.path_save_dir)
-    vis_enc = str_to_object(
-        "CVAE_testbed.metrics.visualize_encoder.visualize_encoder_synthetic"
-    )
-    try:
-        conds = [i for i in range(args.model_kwargs["dec_layers"][-1][-1])]
-    except:
-        conds = [i for i in range(args.model_kwargs["dec_layers"][-1])]
-    fig, (ax1, ax, ax2, ax3) = plt.subplots(1, 4, figsize=(7 * 4, 5))
-    fig2 = plt.figure(figsize=(12, 10))
-    bax = brokenaxes(xlims=((0, 8), (60, 64)), hspace=0.15)
-
-    if "total_train_losses" in df.columns:
-        sns.lineplot(ax=ax1, data=df, x="epoch", y="total_train_losses")
-        ax1.set_xlabel("Epoch")
-        ax1.set_ylabel("Loss")
-    if "total_test_losses" in df.columns:
-        sns.lineplot(ax=ax1, data=df, x="epoch", y="total_test_losses")
-        ax1.set_xlabel("Epoch")
-        ax1.set_ylabel("Loss")
-        ax1.set_ylim([0, df.total_test_losses.quantile(0.95)])
-        ax1.legend(["Train loss", "Test loss"])
-    ax1.set_title("Loss vs epoch")
-
-    try:
-        this_kwargs = args.model_kwargs["dec_layers"][-1][-1]
-    except:
-        this_kwargs = args.model_kwargs["dec_layers"][-1]
-    make_data = str_to_object(args.dataloader)
-    this_dataloader = make_data(
-        1, args.batch_size * 10, args.model_kwargs, shuffle=False
-    )
-    c, d, _, _ = this_dataloader.get_all_items()
-
-    conds = [i for i in range(this_kwargs)]
-    if args.post_plot_kwargs["latent_space_colorbar"] == "yes":
-        color = this_dataloader.get_color()
-    else:
-        color = None
-
-    for i in range(len(conds) + 1):
-        # print(conds, i)
-        if i == 0:
-            z_means_x, z_means_y, kl_per_lt, _, _ = vis_enc(
-                args,
-                model,
-                conds,
-                c[0, :].clone(),
-                d[0, :].clone(),
-                kl_per_lt=None
-            )
-            ax.scatter(
-                z_means_x,
-                z_means_y,
-                marker=".",
-                s=30,
-                label=str(this_kwargs - len(conds)),
-            )
-            if color is not None:
-                colormap_plot(
-                    path_save_dir,
-                    c, z_means_x,
-                    z_means_y, color,
-                    conds)
-        else:
-            z_means_x, z_means_y, kl_per_lt, _, _ = vis_enc(
-                args,
-                model,
-                conds,
-                c[0, :].clone(),
-                d[0, :].clone(),
-                kl_per_lt
-            )
-            ax.scatter(
-                z_means_x,
-                z_means_y,
-                marker=".",
-                s=30,
-                label=str(this_kwargs - len(conds)),
-            )
-            if color is not None:
-                colormap_plot(
-                    path_save_dir,
-                    c,
-                    z_means_x,
-                    z_means_y,
-                    color,
-                    conds
-                    )
-        try:
-            conds.pop()
-        except:
-            pass
-    try:
-        path_csv = path_save_dir / Path("visualize_encoding.csv")
-        kl_per_lt = pd.DataFrame(kl_per_lt)
-        kl_per_lt.to_csv(path_csv)
-        LOGGER.info(f"Saved: {path_csv}")
-    except:
-        pass
-    ax.set_title("Latent space")
-    ax.legend()
-
-    for i in range(this_kwargs + 1):
-        tmp = kl_per_lt.loc[kl_per_lt["num_conds"] == i]
-        tmp = tmp.sort_values(
-            by="kl_divergence",
-            ascending=False
-            )
-        tmp = tmp.reset_index(drop=True)
-        x = tmp.index.values
-        y = tmp.iloc[:, 1].values
-        sns.lineplot(
-            ax=ax2,
-            data=tmp,
-            x=tmp.index,
-            y="kl_divergence",
-            label=str(i)
-            )
-        # ax2.plot(np.log2(x + 1) , y, label = str(i))
-        bax.plot(x, y, label=str(i))
-        sns.scatterplot(
-            ax=ax3,
-            data=tmp,
-            x="rcl",
-            y="kl_divergence",
-            label=str(i)
-            )
-
-    ax2.set_xlabel("Latent dimension")
-    ax2.set_ylabel("KLD")
-    ax2.set_title("KLD per latent dim")
-    ax3.set_xlabel("MSE")
-    ax3.set_ylabel("KLD")
-    ax3.set_title("MSE vs KLD")
-    bax.legend(loc="best")
-    bax.set_xlabel("Latent dimension")
-    bax.set_ylabel("KLD")
-    bax.set_title("KLD per latent dim")
-
-    try:
-        path_save_fig = path_save_dir / Path("encoding_test_plots.png")
-        fig.savefig(path_save_fig, bbox_inches="tight")
-        LOGGER.info(f"Saved: {path_save_fig}")
-    except:
-        pass
-
-    try:
-        path_save_fig = path_save_dir / Path("brokenaxes_KLD_per_dim.png")
-        fig2.savefig(path_save_fig, bbox_inches="tight")
-        LOGGER.info(f"Saved: {path_save_fig}")
-    except:
-        pass
-
-
-def colormap_plot(
-    path_save_dir, swiss_roll, z_means_x, z_means_y, color, conds
-) -> None:
-
-    # fig, ax = plt.subplots(1, 2, figsize=(7*2,5))
-    fig = plt.figure(figsize=(7 * 2, 5))
-
-    ax1 = fig.add_subplot(121, projection="3d")
-    swiss_roll = swiss_roll[0, :]
-    try:
-        ax1.scatter(swiss_roll[:, 0], swiss_roll[:, 1], swiss_roll[:, 2], c=color)
-    except:
-        ax1.scatter(swiss_roll[:, 0], swiss_roll[:, 1], c=color)
-
-    ax = fig.add_subplot(122)
-    divider = make_axes_locatable(ax)
-    cax = divider.append_axes(
-        "right", size="5%",
-        pad=0.05,
-        title="arc length"
-        )
-    a = ax.scatter(z_means_x, z_means_y, c=color)
-    fig.colorbar(a, cax=cax)
-
-    path_save_fig = path_save_dir / Path(
-        "latent_space_colormap_conds_" + str(3 - len(conds)) + ".png"
-    )
-    fig.savefig(path_save_fig, bbox_inches="tight")
-    LOGGER.info(f"Saved: {path_save_fig}")
-
-
-def make_plot(
-        df: pd.DataFrame,
-        df2: pd.DataFrame,
-        path_save_dir: Path,
-        args: argparse.Namespace
-        ) -> None:
-    """Generates and saves training loss plot.
-    Parameters
-    ----------
-    df
-        DataFrame with costs for each echo or iteration.
-    path_save_dir
-        Plot save directory.
-    Returns
-    -------
-    None
-    """
-    fig, ax = plt.subplots(figsize=(6.5, 5))
-    if "test_kld_per_dim" in df2.columns:
-        sns.lineplot(
-            ax=ax,
-            data=df2,
-            x="dimension",
-            y="test_kld_per_dim",
-            hue="num_conds",
-            legend="full",
-        )
-        # for i in range(len(set(df['num_conds']))):
-        #     tmp = df.loc[df['num_conds'] == i]
-        #     print('minimum RCL', np.sort(tmp['test_rcl'])[0])
-        #     print('minimum KLD', np.sort(tmp['test_klds'])[0])
-        ax.set_xlabel("Latent dimension")
-        ax.set_ylabel("Sum KLD per dimension")
-    path_save_fig = path_save_dir / Path("KLD_vs_dimension.png")
-    fig.savefig(path_save_fig, bbox_inches="tight")
-
-    if "fid_any_color_any_digit" in df.columns:
-        fig, ax = plt.subplots()
-        ax.plot(
-            df.index,
-            df["fid_any_color_any_digit"],
-            marker=".",
-            label="fid any color and digit",
-        )
-        ax.plot(
-            df.index,
-            df["fid_color_red_any_digit"],
-            linestyle="--",
-            marker="<",
-            label="fid color red any digit",
-        )
-        ax.plot(
-            df.index,
-            df["fid_any_color_digit_5"],
-            linestyle="-.",
-            marker="o",
-            label="fid any color digit 5",
-        )
-        ax.plot(
-            df.index,
-            df["fid_color_red_digit_5"],
-            linestyle=":",
-            marker="v",
-            label="color red digit 5",
-        )
-        ax.set_xlabel("Epoch")
-        ax.set_ylabel("FID score")
-        ax.legend()
-        path_save_fig = path_save_dir / Path("fid_scores.png")
-        fig.savefig(path_save_fig, bbox_inches="tight")
-        LOGGER.info(f"Saved: {path_save_fig}")
-
-    if "generated_image_any_color_any_digit" in df.columns:
-        df = df.loc[df["epoch"] == args.n_epochs - 1]
-        fig, ax = plt.subplots(figsize=(10, 10))
-
-        ax.imshow(
-            np.transpose(
-                df["generated_image_any_color_any_digit"].item().cpu(),
-                (1, 2, 0)
-            )
-        )
-        path_save_fig = path_save_dir / Path("generated_image_any_color_any_digit.png")
-        fig.savefig(path_save_fig, bbox_inches="tight")
-        LOGGER.info(f"Saved: {path_save_fig}")
-
-    if "real_image_any_color_any_digit" in df.columns:
-        fig, ax = plt.subplots(figsize=(10, 10))
-        ax.imshow(
-                np.transpose(df["real_image_any_color_any_digit"].item().cpu(), (1, 2, 0))
-                )
-        path_save_fig = path_save_dir / Path("real_image_any_color_any_digit.png")
-        fig.savefig(path_save_fig, bbox_inches="tight")
-        LOGGER.info(f"Saved: {path_save_fig}")
-
-    if "generated_image_color_red_any_digit" in df.columns:
-        fig, ax = plt.subplots(figsize=(10, 10))
-        ax.imshow(
-            np.transpose(
-                df["generated_image_color_red_any_digit"].item().cpu(),
-                (1, 2, 0)
-            )
-        )
-        path_save_fig = path_save_dir / Path("generated_image_color_red_any_digit.png")
-        fig.savefig(path_save_fig, bbox_inches="tight")
-        LOGGER.info(f"Saved: {path_save_fig}")
-
-    if "real_image_color_red_any_digit" in df.columns:
-        fig, ax = plt.subplots(figsize=(10, 10))
-        ax.imshow(
-            np.transpose(df["real_image_color_red_any_digit"].item().cpu(), (1, 2, 0))
-        )
-        path_save_fig = path_save_dir / Path("real_image_color_red_any_digit.png")
-        fig.savefig(path_save_fig, bbox_inches="tight")
-        LOGGER.info(f"Saved: {path_save_fig}")
-
-    if "generated_image_any_color_digit_5" in df.columns:
-        fig, ax = plt.subplots(figsize=(10, 10))
-        ax.imshow(
-            np.transpose(
-                df["generated_image_any_color_digit_5"].item().cpu(), (1, 2, 0)
-            )
-        )
-        path_save_fig = path_save_dir / Path("generated_image_any_color_digit_5.png")
-        fig.savefig(path_save_fig, bbox_inches="tight")
-        LOGGER.info(f"Saved: {path_save_fig}")
-
-    if "real_image_any_color_digit_5" in df.columns:
-        fig, ax = plt.subplots(figsize=(10, 10))
-        ax.imshow(
-            np.transpose(df["real_image_any_color_digit_5"].item().cpu(), (1, 2, 0))
-        )
-        path_save_fig = path_save_dir / Path("real_image_any_color_digit_5.png")
-        fig.savefig(path_save_fig, bbox_inches="tight")
-        LOGGER.info(f"Saved: {path_save_fig}")
-
-    if "generated_image_color_red_digit_5" in df.columns:
-        fig, ax = plt.subplots(figsize=(10, 10))
-        ax.imshow(
-            np.transpose(
-                df["generated_image_color_red_digit_5"].item().cpu(), (1, 2, 0)
-            )
-        )
-        path_save_fig = path_save_dir / Path("generated_image_color_red_digit_5.png")
-        fig.savefig(path_save_fig, bbox_inches="tight")
-        LOGGER.info(f"Saved: {path_save_fig}")
-
-    if "real_image_color_red_digit_5" in df.columns:
-        fig, ax = plt.subplots(figsize=(10, 10))
-        ax.imshow(
-            np.transpose(df["real_image_color_red_digit_5"].item().cpu(), (1, 2, 0))
-        )
-        path_save_fig = path_save_dir / Path("real_image_color_red_digit_5.png")
-        fig.savefig(path_save_fig, bbox_inches="tight")
-        LOGGER.info(f"Saved: {path_save_fig}")
-
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

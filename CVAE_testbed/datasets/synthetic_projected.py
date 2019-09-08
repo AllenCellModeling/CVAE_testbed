@@ -2,6 +2,8 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 from torch.distributions import MultivariateNormal
 import numpy as np
+import sklearn
+from sklearn import preprocessing
 
 class ProjectedSyntheticDataset(Dataset):
     def __init__(self, num_batches, BATCH_SIZE, model_kwargs, shuffle=True, corr=False, train=True, P = None, mask=False):
@@ -40,14 +42,19 @@ class ProjectedSyntheticDataset(Dataset):
             X = torch.cat([X, torch.zeros((self.BATCH_SIZE, self.model_kwargs['projection_dim'] - self.model_kwargs['x_dim']))], 1)
             X = X.t()
             X = torch.mm(self._P, X).cuda()
+
+            # std_scaler = preprocessing.StandardScaler()
+            # X = torch.from_numpy(std_scaler.fit_transform(X.cpu().numpy())).cuda()
+            # X = torch.from_numpy(sklearn.preprocessing.normalize(X.cpu().numpy(), axis=0)).cuda()
             X = X.t()
             C = X.clone().cuda()
             count = 0
             if self.shuffle is True:
                 while count == 0:
                     C_mask = torch.zeros(C.shape).bernoulli_(0.5)
-                    if len(set([i.item() for i in torch.sum(C_mask, dim = 1)])) == self.model_kwargs['projection_dim'] + 1:
-                        count = 1 
+                    count = 1
+                    # if len(set([i.item() for i in torch.sum(C_mask, dim = 1)])) == self.model_kwargs['projection_dim'] + 1:
+                        # count = 1 
             else:
                 C_mask = torch.zeros(C.shape).bernoulli_(0)
 
@@ -103,8 +110,8 @@ class ProjectedSyntheticDataset(Dataset):
         col = 0
         for row in range(P.size()[0]):
             # col = torch.randint(0,self.model_kwargs['x_dim'],(1,)).item()
-            # P[row][col] = torch.randn(1).item()
-            P[row][col] = 1
+            P[row][col] = torch.randn(1).item()
+            #P[row][col] = 1
             if col != self.model_kwargs['x_dim'] - 1:
                 col += 1
             else:

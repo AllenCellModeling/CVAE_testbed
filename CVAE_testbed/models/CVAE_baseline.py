@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from CVAE_testbed.models.weight_init import weight_init
 
 
 class CVAE(nn.Module):
@@ -16,29 +17,35 @@ class CVAE(nn.Module):
         for j, (i, k) in enumerate(zip(enc_layers[0::1], enc_layers[1::1])):
             if j == 0:
                 encoder_layers.append(nn.Linear(i + self.cdim, k))
+                encoder_layers.append(nn.BatchNorm1d(k))
                 encoder_layers.append(nn.ReLU())
             elif j == len(enc_layers) - 2:
                 self.fc1 = nn.Linear(enc_layers[-2], enc_layers[-1])
                 self.fc2 = nn.Linear(enc_layers[-2], enc_layers[-1])
             else:
                 encoder_layers.append(nn.Linear(i, k))
+                encoder_layers.append(nn.BatchNorm1d(k))
                 encoder_layers.append(nn.ReLU())
-
+                
         self.encoder_net = nn.Sequential(*encoder_layers)
+        self.encoder_net.apply(weight_init)
         # decoder part
         decoder_layers = []
         # decoder_net = nn.Sequential()
         for j, (i, k) in enumerate(zip(dec_layers[0::1], dec_layers[1::1])):
             if j == 0:
                 decoder_layers.append(nn.Linear(i + self.cdim, k))
+                decoder_layers.append(nn.BatchNorm1d(k))
                 decoder_layers.append(nn.ReLU())
             elif j == len(dec_layers) - 2:
                 decoder_layers.append(nn.Linear(i, k))
             else:
                 decoder_layers.append(nn.Linear(i, k))
+                decoder_layers.append(nn.BatchNorm1d(k))
                 decoder_layers.append(nn.ReLU())
-
+                
         self.decoder_net = nn.Sequential(*decoder_layers)
+        self.decoder_net.apply(weight_init)
 
     def encoder(self, x, c):
 

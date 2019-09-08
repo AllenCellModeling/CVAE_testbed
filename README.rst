@@ -217,6 +217,33 @@ Despite having 3 dimensions, it is parametrized by 2 dimensions. Running this sc
 
 This plot can be viewed in outputs/baseline_results_swissroll. We observe that given 0 conditions (blue), the model gets embedded into only dimensions in the latent space. Providing 1 condition (X) is no different then providing 2 conditions (X and Y) since both X and Y are parameterized by only 1 dimension. Finally, providing both conditions means that no information passes throught the bottleneck and the model encodes no information. 
 
+* Run sklearn datasets model. This model will take the sklearn datasets like circles, moons and blobs as an input. 
+
+.. code-block:: bash
+
+    $ ./baseline_circles_moons_blobs.sh
+
+The type of dataset (i.e. circles or moons or blobs) is specified in "sklearn_data" in baseline_kwargs_circles_moons_blobs.json. Running this file for blobs gives 
+
+.. image:: https://user-images.githubusercontent.com/40371793/63800963-1d2acc00-c8c4-11e9-85c9-55d32c574eb0.png
+   :width: 750px
+   :scale: 100 %
+   :align: center
+
+Similarly for moons gives 
+
+.. image:: https://user-images.githubusercontent.com/40371793/63801022-3af83100-c8c4-11e9-82b1-234f42c92796.png
+   :width: 750px
+   :scale: 100 %
+   :align: center
+
+This is what the original data of moons looks like 
+
+.. image:: https://user-images.githubusercontent.com/40371793/63801095-61b66780-c8c4-11e9-9b59-d51be918211f.png
+   :width: 750px
+   :scale: 100 %
+   :align: center
+
 * Run compare_models.py to compare results across output folders
 
 To-do list
