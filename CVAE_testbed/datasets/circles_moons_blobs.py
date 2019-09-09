@@ -94,29 +94,11 @@ class CirclesMoonsBlobs(Dataset):
 
     def get_all_items(self):
         if self.train is True:
-            return self._batches_x, self._batches_c, self._batches_conds, self._P
+            return self._batches_x, self._batches_c, self._batches_conds, None
         else:
             return self._batches_x, self._batches_c, self._batches_conds
-    
-    def __len__(self):
-        return len(self._batches_x)
-
-    def __getitem__(self, idx):
-        """
-        Returns a tuple. (X, C, sum(C[mid:end])). 
-        X is the input, 
-        C is the condition, 
-        sum(C[mid:end]) is the sum of the indicators in C. It tells us how many of the condition
-        columns have been masked
-        """
-        return self._batches_x[idx], self._batches_c[idx], self._batches_conds[idx]
 
     def get_color(self):
         return self._color
 
-    def get_all_items(self):
-        if self.train is True:
-            return self._batches_x, self._batches_c, self._batches_conds, None
-        else:
-            return self._batches_x, self._batches_c, self._batches_conds
 

@@ -84,6 +84,7 @@ def run_synthetic(
             dataframe["total_test_ELBO"].append(test_rcl + test_kld)
             dataframe["test_rcl"].append(test_rcl_per_cond[j].item())
             dataframe["test_kld"].append(test_kld_per_cond[j].item())
+            print(j, 'TEST ELBO', test_rcl + test_kld, 'TEST KLD per dim', test_kld_per_cond[j].item())
 
         stats = pd.DataFrame(dataframe)
         # print(X_train.size())
@@ -129,7 +130,6 @@ def train(
         torch.empty([0]),
     )
     batch_length = 0
-    print('train', X_train.size(), C_train.size())
 
     for j, i in enumerate(X_train):
         optimizer.zero_grad()
@@ -230,7 +230,6 @@ def test(
         torch.empty([0]),
     )
     batch_length = 0
-    print('test', X_test.size(), C_test.size())
 
     with torch.no_grad():
         for j, i in enumerate(X_test):

@@ -10,8 +10,11 @@ from CVAE_testbed.utils import str_to_object
 LOGGER = logging.getLogger(__name__)
 
 
-def make_plot_encoding_greedy(args: argparse.Namespace, model, df: pd.DataFrame
+def make_plot_encoding_greedy(args: argparse.Namespace, model, df: pd.DataFrame, c, d, feature_names=None, save=True
         ) -> None:
+    """
+    c and d are X_test and C_test
+    """
     sns.set_context("talk")
     path_save_dir = Path(args.path_save_dir)
     vis_enc = str_to_object(
@@ -26,72 +29,140 @@ def make_plot_encoding_greedy(args: argparse.Namespace, model, df: pd.DataFrame
     this_dataloader = make_data(
         1, args.batch_size * 10, args.model_kwargs, shuffle=False
     )
-    c, d, _, _ = this_dataloader.get_all_items()
+    # c, d, _, _ = this_dataloader.get_all_items()
 
-    kl_per_lt, kl_all_lt = vis_enc(
+    kl_per_lt, kl_all_lt, selected_features, first_features = vis_enc(
         args,
         model,
         conds,
-        c[0, :].clone(),
-        d[0, :].clone(),
+        c[-1, :].clone(),
+        d[-1, :].clone(),
         kl_per_lt=None,
-        kl_all_lt=None
+        kl_all_lt=None, 
+        selected_features=None,
+        feature_names=feature_names
     )
 
+    kl_per_lt, kl_all_lt, selected_features, first_features = pd.DataFrame(kl_per_lt), pd.DataFrame(kl_all_lt), pd.DataFrame(selected_features), pd.DataFrame(first_features)
 
-    kl_per_lt, kl_all_lt = pd.DataFrame(kl_per_lt), pd.DataFrame(kl_all_lt)
+    if save is True:
+        path_csv = path_save_dir / Path("kl_per_lt.csv")
+        kl_per_lt.to_csv(path_csv)
+        LOGGER.info(f"Saved: {path_csv}")
 
-    fig, (ax, ax1, ax2) = plt.subplots(1, 3, figsize=(7 * 3, 4))
-    sns.lineplot(ax=ax, data=kl_per_lt, x = 'num_conds', y = 'elbo', estimator='mean')
-    sns.lineplot(ax=ax1, data=kl_per_lt, x = 'num_conds', y = 'kl_divergence', estimator='mean')
-    sns.lineplot(ax=ax2, data=kl_per_lt, x = 'num_conds', y = 'rcl', estimator='mean')
-    path_save_fig = path_save_dir / Path("greedy_elbo_kld_rcl_conds.png")
-    fig.savefig(path_save_fig, bbox_inches="tight")
-    LOGGER.info(f"Saved: {path_save_fig}")
+        path_csv = path_save_dir / Path("kl_all_lt.csv")
+        kl_all_lt.to_csv(path_csv)
+        LOGGER.info(f"Saved: {path_csv}")
 
-    fig, (ax, ax1, ax2) = plt.subplots(1, 3, figsize=(7 * 3, 4))
-    sns.lineplot(ax=ax, data=kl_per_lt, x = 'latent_dim', y = 'elbo', estimator='mean')
+        path_csv = path_save_dir / Path("selected_features.csv")
+        selected_features.to_csv(path_csv)
+        LOGGER.info(f"Saved: {path_csv}")
+
+        path_csv = path_save_dir / Path("first_features.csv")
+        selected_features.to_csv(path_csv)
+        LOGGER.info(f"Saved: {path_csv}")
+
+    fig, ax1 = plt.subplots(1, 1, figsize=(7 * 1, 4))
     sns.lineplot(ax=ax1, data=kl_per_lt, x = 'latent_dim', y = 'kl_divergence', estimator='mean')
-    sns.lineplot(ax=ax2, data=kl_per_lt, x = 'latent_dim', y = 'rcl', estimator='mean')
 
-    path_save_fig = path_save_dir / Path("greedy_elbo_kld_rcl_dims.png")
-    fig.savefig(path_save_fig, bbox_inches="tight")
-    LOGGER.info(f"Saved: {path_save_fig}")
+    if save is True:
+        path_save_fig = path_save_dir / Path("greedy_elbo_kld_rcl_dims.png")
+        fig.savefig(path_save_fig, bbox_inches="tight")
+        LOGGER.info(f"Saved: {path_save_fig}")
 
-    kld_per_dim = pd.pivot_table(kl_per_lt, values='kl_divergence', index='num_conds', columns = 'cond_comb', aggfunc=np.sum)
+    # kld_per_dim = pd.pivot_table(kl_per_lt, values='kl_divergence', index='popped_cond', columns = 'latent_dim', aggfunc=np.mean)
 
-    rcl_per_dim = pd.pivot_table(kl_per_lt, values='rcl', index='num_conds', columns = 'cond_comb', aggfunc=np.sum)
+    # rcl_per_dim = pd.pivot_table(kl_per_lt, values='rcl', index='popped_cond', columns = 'latent_dim', aggfunc=np.mean)
 
-    elbo_per_dim = pd.pivot_table(kl_per_lt, values='elbo', index='num_conds', columns = 'cond_comb', aggfunc=np.sum)
+    # elbo_per_dim = pd.pivot_table(kl_per_lt, values='elbo', index='popped_cond', columns = 'latent_dim', aggfunc=np.mean)
 
-    fig2, (ax, ax2, ax3) = plt.subplots(1, 3, figsize=(10 * 3, 5))
-    sns.heatmap(elbo_per_dim, ax=ax, cmap = 'coolwarm')
-    ax.set_title('-ELBO')
 
-    sns.heatmap(kld_per_dim, ax=ax2, cmap = 'coolwarm')
-    ax2.set_title('KLD')
-    sns.heatmap(rcl_per_dim, ax=ax3, cmap = 'coolwarm')
-    ax3.set_title('RCL')
+    fig2, ax= plt.subplots(1, 1, figsize=(7 * 1, 4))
+    first_features.sort_values(by='ELBO', ascending=False, inplace=True)
+    print(first_features)
+    if all(pd.isna(first_features['selected_feature_name'])):
+        bar_fig = sns.lineplot(data=first_features, ax=ax, x='selected_feature_number', y='ELBO', label='ELBO', sort=False)
+        sns.scatterplot(data=first_features, ax=ax, x='selected_feature_number', y='ELBO', s=100, color=".2")
+        sns.lineplot(data=first_features, ax=ax, x='selected_feature_number', y='RCL', label='RCL', sort=False)
+        sns.scatterplot(data=first_features, ax=ax, x='selected_feature_number', y='RCL', s=100, color=".2")
+        # sns.barplot(data=first_features, ax=ax3, x='selected_feature_number', y='KLD')
+    else:
+        bar_fig = sns.lineplot(data=first_features, ax=ax, x='selected_feature_name', y='ELBO', label="ELBO", sort=False)
+        sns.scatterplot(data=first_features, ax=ax, x='selected_feature_name', y='ELBO', s=100, color=".2")
+        sns.lineplot(data=first_features, ax=ax, x='selected_feature_name', y='RCL', label="RCL", sort=False)
+        sns.scatterplot(data=first_features, ax=ax, x='selected_feature_name', y='RCL', s=100, color=".2")
+        # sns.barplot(data=first_features, ax=ax3, x='selected_feature_name', y='KLD')
 
-    path_save_fig = path_save_dir / Path("greedy_heatmaps.png")
-    fig2.savefig(path_save_fig, bbox_inches="tight")
-    LOGGER.info(f"Saved: {path_save_fig}")
+    for item in bar_fig.get_xticklabels():
+        item.set_rotation(45)
 
-    df = kl_all_lt.loc[kl_all_lt['num_conds'] == c.size()[-1] - 1]
-    this_z_means_x = df['z_means_x'].values
-    this_z_means_y = df['z_means_y'].values
+    ax.set_title('ELBO per selected first feature')  
+    # ax2.set_title('RCL per selected first feature')
+    # ax3.set_title('KLD per selected first feature')
+    ax.set_xlabel('Selected feature')
+    ax.set_ylabel('ELBO')
+    # ax2.set_xlabel('Selected feature')
+    # ax2.set_ylabel('RCL')
+    # ax3.set_xlabel('Selected feature')
+    # ax3.set_ylabel('KLD')
+    if save is True:
+        path_save_fig = path_save_dir / Path("greedy_barplots_first_selection.png")
+        fig2.savefig(path_save_fig, bbox_inches="tight")
+        LOGGER.info(f"Saved: {path_save_fig}")
 
-    fig4, ax = plt.subplots(1,1,figsize = (6, 5))
-    ax.scatter(this_z_means_x[0], this_z_means_y[0], marker=".", s=30, label= str(0))
 
-    print('greedy', c.size()[-1])
-    df = kl_all_lt.loc[kl_all_lt['num_conds'] == c.size()[-1]]
+    fig2, ax = plt.subplots(1, 1, figsize=(7 * 1, 4))
 
-    this_z_means_x = df['z_means_x'].values
-    this_z_means_y = df['z_means_y'].values
-    ax.scatter(this_z_means_x[0], this_z_means_y[0], marker=".", s=30, label= str(c.size()[-1]))
-    ax.set_title("Latent space")
-    ax.legend()
-    path_save_fig = path_save_dir / Path("encoding_latent_space.png")
-    fig4.savefig(path_save_fig, bbox_inches="tight")
-    LOGGER.info(f"Saved: {path_save_fig}")
+
+    selected_features.sort_values(by='ELBO', ascending=False, inplace=True)
+    print(selected_features)
+    if all(pd.isna(selected_features['selected_feature_name'])):
+        bar_fig = sns.lineplot(data=selected_features, ax=ax, x='selected_feature_number', y='ELBO', label='ELBO', sort=False)
+        sns.scatterplot(data=selected_features, ax=ax, x='selected_feature_number', y='ELBO', s=100, color=".2")
+        sns.lineplot(data=selected_features, ax=ax, x='selected_feature_number', y='RCL', label='RCL',sort=False)
+        sns.scatterplot(data=selected_features, ax=ax, x='selected_feature_number', y='RCL', s=100, color=".2")
+        # sns.barplot(data=selected_features, ax=ax3, x='selected_feature_number', y='KLD')
+    else:
+        bar_fig = sns.lineplot(data=selected_features, ax=ax, x='selected_feature_name', y='ELBO', label='ELBO', sort=False)
+        sns.scatterplot(data=selected_features, ax=ax, x='selected_feature_name', y='ELBO', s=100, color=".2")
+        sns.lineplot(data=selected_features, ax=ax, x='selected_feature_name', y='RCL', label='RCL',sort=False)
+        sns.scatterplot(data=selected_features, ax=ax, x='selected_feature_name', y='RCL', s=100, color=".2")
+        # sns.barplot(data=selected_features, ax=ax3, x='selected_feature_name', y='KLD')
+
+    for item in bar_fig.get_xticklabels():
+        item.set_rotation(45)
+    
+    ax.set_title('ELBO per selected feature')
+    # ax2.set_title('RCL per selected feature')
+    # ax3.set_title('KLD per selected feature')
+    ax.set_xlabel('Selected feature')
+    ax.set_ylabel('ELBO')
+    # ax2.set_xlabel('Selected feature')
+    # ax2.set_ylabel('RCL')
+    # ax3.set_xlabel('Selected feature')
+    # ax3.set_ylabel('KLD')
+    if save is True:
+        path_save_fig = path_save_dir / Path("greedy_barplots.png")
+        fig2.savefig(path_save_fig, bbox_inches="tight")
+        LOGGER.info(f"Saved: {path_save_fig}")
+
+    # df = kl_all_lt.loc[kl_all_lt['num_conds'] == 0]
+    # this_z_means_x = df['z_means_x'].values
+    # this_z_means_y = df['z_means_y'].values
+
+    # fig4, ax = plt.subplots(1,1,figsize = (7, 4))
+    # ax.scatter(this_z_means_x[0], this_z_means_y[0], marker=".", s=30, label= str(0))
+
+    # print('greedy', c.size()[-1])
+    # df = kl_all_lt.loc[kl_all_lt['num_conds'] == c.size()[-1]]
+
+    # this_z_means_x = df['z_means_x'].values
+    # this_z_means_y = df['z_means_y'].values
+    # ax.scatter(this_z_means_x[0], this_z_means_y[0], marker=".", s=30, label= str(c.size()[-1]))
+    # ax.set_title("Latent space")
+    # ax.legend()
+
+    # if save is True:
+    #     path_save_fig = path_save_dir / Path("encoding_latent_space.png")
+    #     fig4.savefig(path_save_fig, bbox_inches="tight")
+    #     LOGGER.info(f"Saved: {path_save_fig}")

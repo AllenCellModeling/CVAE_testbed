@@ -206,6 +206,8 @@ def train_model():
     )
     LOGGER.info(f"Using device: {device}")
 
+    feature_names = None
+
     if args.data_type == "mnist":
         load_data = str_to_object(args.dataloader)
         train_iterator, test_iterator = load_data(
@@ -223,6 +225,7 @@ def train_model():
         )
         X_train, C_train, Cond_indices_train = aics_instance.get_train_data()
         X_test, C_test, Cond_indices_test = aics_instance.get_test_data()
+        feature_names = aics_instance.get_feature_names()
         print('CVAE train')
         print(X_train.size(), X_test.size())
     elif args.data_type == "synthetic":
@@ -286,6 +289,10 @@ def train_model():
             "CVAE_testbed.utils.loss_and_image_plots.make_plot"
             )
 
+    make_fid_plot = str_to_object(
+            "CVAE_testbed.utils.FID_score.make_plot_FID"
+            )
+
     if args.data_type == "mnist":
         run = str_to_object(
             "CVAE_testbed.run_models.run_test_train.run_test_train"
@@ -323,10 +330,14 @@ def train_model():
             args.model_kwargs,
         )
         if args.data_type == 'aics_features' or args.data_type == 'synthetic':
-            make_plot_encoding_greedy(args, model, stats)
-            make_plot_encoding(args, model, stats)
+            make_plot_encoding_greedy(args, model, stats, X_test, C_test, feature_names)
+            make_plot_encoding(args, model, stats, X_test, C_test)
+            try:
+                make_fid_plot(args, model, X_test[:, :], C_test[:, :])
+            except:
+                pass
         else:
-            make_plot_encoding(args, model, stats)
+            make_plot_encoding(args, model, stats, X_test, C_test)
 
     this_model = ModelLoader(model, path_save_dir)
     this_model.save_model()
@@ -341,6 +352,7 @@ def train_model():
     make_plot(stats, stats_per_dim, path_save_dir, args)
     LOGGER.info(f"Elapsed time: {time.time() - tic:.2f}")
     print("saved:", path_save_dir)
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

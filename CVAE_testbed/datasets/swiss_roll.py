@@ -4,6 +4,7 @@ from torch.distributions import MultivariateNormal
 import numpy as np
 from sklearn import manifold, datasets
 
+
 class SwissRoll(Dataset):
     def __init__(self, num_batches, BATCH_SIZE, model_kwargs, shuffle=True, corr=False, train=True, mask=False):
         """
@@ -51,7 +52,7 @@ class SwissRoll(Dataset):
                 swiss_roll[mask_indices, 0] = 0
                 swiss_roll[mask_indices, 1] = 0
                 swiss_roll[mask_indices, 2] = 0
-        
+     
             C = swiss_roll.clone()
             count = 0
             if self.shuffle is True:
@@ -81,7 +82,7 @@ class SwissRoll(Dataset):
         self._batches_x = Batches_X
         self._batches_c = Batches_C
         self._batches_conds = Batches_conds
-    
+ 
     def __len__(self):
         return len(self._batches_x)
 
@@ -94,32 +95,13 @@ class SwissRoll(Dataset):
         columns have been masked
         """
         return self._batches_x[idx], self._batches_c[idx], self._batches_conds[idx]
-
-    def get_all_items(self):
-        if self.train is True:
-            return self._batches_x, self._batches_c, self._batches_conds, self._P
-        else:
-            return self._batches_x, self._batches_c, self._batches_conds
-    
-    def __len__(self):
-        return len(self._batches_x)
-
-    def __getitem__(self, idx):
-        """
-        Returns a tuple. (X, C, sum(C[mid:end])). 
-        X is the input, 
-        C is the condition, 
-        sum(C[mid:end]) is the sum of the indicators in C. It tells us how many of the condition
-        columns have been masked
-        """
-        return self._batches_x[idx], self._batches_c[idx], self._batches_conds[idx]
-
-    def get_color(self):
-        return self._color
 
     def get_all_items(self):
         if self.train is True:
             return self._batches_x, self._batches_c, self._batches_conds, None
         else:
             return self._batches_x, self._batches_c, self._batches_conds
+
+    def get_color(self):
+        return self._color
 
