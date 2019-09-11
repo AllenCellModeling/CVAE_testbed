@@ -55,7 +55,7 @@ def visualize_encoder_synthetic(args, model, conds, c, d, kl_per_lt=None, kl_vs_
             log_var,
             args
         )
-        print('conds is', conds, elbo_loss_total, rcl_per_lt_temp_total, kl_per_lt_temp_total)
+        # print('conds is', conds, elbo_loss_total, rcl_per_lt_temp_total, kl_per_lt_temp_total)
         kl_vs_rcl['num_conds'].append(c.size()[-1] - len(conds))
         kl_vs_rcl['KLD'].append(kl_per_lt_temp_total.item())
         kl_vs_rcl['RCL'].append(rcl_per_lt_temp_total.item())
@@ -69,7 +69,7 @@ def visualize_encoder_synthetic(args, model, conds, c, d, kl_per_lt=None, kl_vs_
                 log_var[:, ii],
                 args
             )
-            print(elbo_loss.item(), rcl_per_lt_temp.item(), kl_per_lt_temp.item())
+            # print(elbo_loss.item(), rcl_per_lt_temp.item(), kl_per_lt_temp.item())
 
             all_kl = np.append(all_kl, kl_per_lt_temp.item())
             all_lt.append(ii)

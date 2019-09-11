@@ -166,7 +166,7 @@ class QuiltAicsFeatures(Dataset):
         # This is mean, std normalization
         non_categorical_dataframe = non_categorical_dataframe.iloc[:, :]
 
-        print(non_categorical_dataframe.shape)
+        # print(non_categorical_dataframe.shape)
 
         self._feature_names = [
             i for i in non_categorical_dataframe.columns
@@ -250,8 +250,8 @@ class QuiltAicsFeatures(Dataset):
             if X_train.size()[0] != self.BATCH_SIZE:
                 break
 
-            print(X_train.size(), X_test.size())
-            print(Batches_X_train.size(), Batches_X_test.size())
+            # print(X_train.size(), X_test.size())
+            # print(Batches_X_train.size(), Batches_X_test.size())
 
             self._color = X_train[:, 0]
 

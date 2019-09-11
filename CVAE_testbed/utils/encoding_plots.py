@@ -4,6 +4,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import pandas as pd
+import numpy as np
 import seaborn as sns
 from brokenaxes import brokenaxes
 from mpl_toolkits.mplot3d import Axes3D
@@ -12,7 +13,7 @@ from CVAE_testbed.utils import str_to_object
 LOGGER = logging.getLogger(__name__)
 
 def make_plot_encoding(
-        args: argparse.Namespace, model, df: pd.DataFrame, c, d, save=True
+        args: argparse.Namespace, model, df: pd.DataFrame, c, d, this_dataloader_color=None, save=True, proj_matrix=None
         ) -> None:
     """
     c and d are X_test and C_test
@@ -65,27 +66,36 @@ def make_plot_encoding(
         this_kwargs = args.model_kwargs["dec_layers"][-1][-1]
     except:
         this_kwargs = args.model_kwargs["dec_layers"][-1]
-    make_data = str_to_object(args.dataloader)
-    this_dataloader = make_data(
-        1, args.batch_size*4, args.model_kwargs, shuffle=False
-    )
-    if args.data_type == 'aics_features':
-        pass
-    else:
-        c, d, _, _ = this_dataloader.get_all_items()
-    print('inside encoding', c[0,:].size(), d[0,:].size())
+    # make_data = str_to_object(args.dataloader)
+
+    # if proj_matrix is not None:
+    #     this_dataloader = make_data(
+    #                         1, args.batch_size*5, args.model_kwargs, shuffle=False, P = proj_matrix
+    #                                )
+    # elif args.data_type == 'aics_features':
+    #     this_dataloader = make_data(
+    #                         args.num_batches, args.batch_size, args.model_kwargs, shuffle=False
+    #                                )
+    # else:
+    #     this_dataloader = make_data(
+    #         1, args.batch_size*5, args.model_kwargs, shuffle=False
+    #                                )
+
+
+    # c, d, _, _ = this_dataloader.get_all_items()
 
     conds = [i for i in range(this_kwargs)]
     # if len(conds) > 20:
     #     conds = [i for i in conds if i%20 == 0]
 
     if args.post_plot_kwargs["latent_space_colorbar"] == "yes":
-        color = this_dataloader.get_color()
+        # color = this_dataloader.get_color()
+        color = this_dataloader_color
     else:
         color = None
 
     for i in range(len(conds) + 1):
-        print('inside main plot encoding', i, len(conds) + 1)
+        # print('inside main plot encoding', i, len(conds) + 1)
         if i == 0:
             z_means_x, z_means_y, kl_per_lt, _, _, kl_vs_rcl = vis_enc(
                 args,
@@ -106,7 +116,7 @@ def make_plot_encoding(
             if color is not None:
                 colormap_plot(
                     path_save_dir,
-                    c, z_means_x,
+                    c[-1, :].clone(), z_means_x,
                     z_means_y, color,
                     conds)
         else:
@@ -129,7 +139,7 @@ def make_plot_encoding(
             if color is not None:
                 colormap_plot(
                     path_save_dir,
-                    c,
+                    c[-1, :].clone(),
                     z_means_x,
                     z_means_y,
                     color,
@@ -176,7 +186,7 @@ def make_plot_encoding(
             label=str(i),
             legend='brief'
             )
-        bax.plot(x, y, label=str(i))
+        bax.plot(x, y)
         ax3.scatter(tmp_2['RCL'].mean(), tmp_2['KLD'].mean(), label=str(i))
         # sns.scatterplot(
         #     ax=ax3,
@@ -197,10 +207,16 @@ def make_plot_encoding(
     ax3.set_xlabel("MSE")
     ax3.set_ylabel("KLD")
     ax3.set_title("MSE vs KLD")
-    bax.legend(loc="best")
+    # bax.legend(loc="best")
     bax.set_xlabel("Latent dimension")
     bax.set_ylabel("KLD")
     bax.set_title("KLD per latent dim")
+
+
+    conds = [i for i in range(this_kwargs)]
+    if len(conds) > 30:
+        ax.get_legend().remove()
+        ax2.get_legend().remove()
 
     if save is True:
         path_save_fig = path_save_dir / Path("encoding_test_plots.png")
@@ -217,11 +233,20 @@ def colormap_plot(
     path_save_dir, swiss_roll, z_means_x, z_means_y, color, conds
 ) -> None:
 
+    # print(color)
+    # print(swiss_roll)
+    # print(swiss_roll.size(), color.size())
+    swiss_roll = swiss_roll.cpu().numpy().astype(np.int32)
+    
+    color = color.cpu().numpy().astype(np.int32)
+
+
     # fig, ax = plt.subplots(1, 2, figsize=(7*2,5))
     fig = plt.figure(figsize=(7 * 2, 5))
 
     ax1 = fig.add_subplot(121, projection="3d")
-    swiss_roll = swiss_roll[0, :]
+    # swiss_roll = swiss_roll[0, :]
+    # print(np.shape(swiss_roll[:, 0]), np.shape(color))
     try:
         ax1.scatter(swiss_roll[:, 0], swiss_roll[:, 1], swiss_roll[:, 2], c=color)
     except:

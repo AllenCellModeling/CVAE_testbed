@@ -2,6 +2,8 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 from torch.distributions import MultivariateNormal
 import numpy as np
+from sklearn.decomposition import PCA
+
 
 class SyntheticDataset(Dataset):
     def __init__(self, num_batches, BATCH_SIZE, model_kwargs, shuffle=True, corr=False, train=True, mask=False):
@@ -78,6 +80,9 @@ class SyntheticDataset(Dataset):
             return self._batches_x, self._batches_c, self._batches_conds, None
         else:
             return self._batches_x, self._batches_c, self._batches_conds
+
+    def get_color(self):
+        return None
 
     def random_corr_mat(self, D=10, beta=1):
         """Generate random valid correlation matrix of dimension D.

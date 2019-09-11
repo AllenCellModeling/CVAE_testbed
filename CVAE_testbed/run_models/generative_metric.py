@@ -9,7 +9,7 @@ from CVAE_testbed.metrics.calculate_fid import get_activations
 from CVAE_testbed.metrics.calculate_fid import calculate_frechet_distance
 
 
-def compute_generative_metric_synthetic(X_test, C_test, args, model):
+def compute_generative_metric_synthetic(X_test, C_test, args, model, conds):
 
     with torch.no_grad():
         device = (
@@ -26,13 +26,16 @@ def compute_generative_metric_synthetic(X_test, C_test, args, model):
 
         z = torch.randn(X_test.size()[0], latent_dims).to(device)
 
-        print(x.size(), z.size(), y.size())
-
         # z = torch.cat((z, y), dim = 1)
 
         generated_x = model.decoder(z, y)
 
-        print(generated_x.size())
+        all_elements = [i for i in range(args.model_kwargs['enc_layers'][0])]
+        # print('0 conds', conds)
+        inverse_conds = [i for i in all_elements if i not in conds]
+        # print('inverse', inverse_conds)
+        for kk in inverse_conds:
+            generated_x[:, int(kk)] = x[:, int(kk)]
 
         X_act_mu = np.mean(x.cpu().numpy(), axis=0)
         recon_act_mu = np.mean(generated_x.cpu().numpy(), axis=0)

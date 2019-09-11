@@ -103,5 +103,5 @@ class SwissRoll(Dataset):
             return self._batches_x, self._batches_c, self._batches_conds
 
     def get_color(self):
-        return self._color
+        return torch.from_numpy(self._color).cuda()
 

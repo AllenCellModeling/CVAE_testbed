@@ -16,6 +16,9 @@ def make_plot_FID(args: argparse.Namespace, model, X_test, C_test, save=True):
 
     X_test = X_test.view(-1, X_test.size()[-1])
     C_test = C_test.view(-1, C_test.size()[-1])
+    # X_test = X_test[-1,:]
+    # C_test = C_test[-1,:]
+    print(X_test.size(), C_test.size())
 
     sns.set_context("talk")
     path_save_dir = Path(args.path_save_dir)
@@ -31,8 +34,9 @@ def make_plot_FID(args: argparse.Namespace, model, X_test, C_test, save=True):
     # ADD YOUR PATH HERE
     csv_greedy_features = pd.read_csv('~/Github/cookiecutter/CVAE_testbed/scripts' + args.path_save_dir[1:] + '/selected_features.csv')
 
-    # conds = [i for i in range(this_kwargs)]
+    #conds = [i for i in range(this_kwargs)]
     conds = [i for i in csv_greedy_features['selected_feature_number'] if not math.isnan(i)]
+
 
     fid_data = {'num_conds': [], 'fid': []}
 
@@ -49,10 +53,19 @@ def make_plot_FID(args: argparse.Namespace, model, X_test, C_test, save=True):
             tmp1[:, int(kk)], tmp2[:, int(kk)] = 0, 0
         cond_d = torch.cat((tmp1, tmp2), 1)
 
+        print(len(torch.nonzero(cond_d)))
+
+        four_fids = []
+
         try:
-            this_fid = compute_fid(X_test.clone(), cond_d.clone(), args, model)
+            this_fid = compute_fid(X_test.clone(), cond_d.clone(), args, model, conds)
+            four_fids.append(this_fid)
         except:
             this_fid = np.NaN
+            four_fids.append(this_fid)
+        print('fid', this_fid)
+        this_fid = np.mean(four_fids)
+                
 
         fid_data['num_conds'].append(X_test.size()[-1] - len(conds))
         fid_data['fid'].append(this_fid)
@@ -64,7 +77,7 @@ def make_plot_FID(args: argparse.Namespace, model, X_test, C_test, save=True):
 
     fid_data = pd.DataFrame(fid_data)
 
-    fig, ax = plt.subplots(1, 1, figsize=(7, 5))
+    fig, ax = plt.subplots(1, 1, figsize=(7*4, 5))
     sns.lineplot(ax=ax, data=fid_data, x='num_conds', y='fid')
     sns.scatterplot(ax=ax, data=fid_data, x='num_conds', y='fid', s=100, color=".2")
 

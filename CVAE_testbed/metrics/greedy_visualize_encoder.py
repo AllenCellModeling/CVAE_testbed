@@ -104,7 +104,7 @@ def GreedyVisualizeEncoder(args, model, conds, c, d, kl_per_lt=None, kl_all_lt=N
             # print(i)
             this_conds = conds.copy()
             del this_conds[i]
-            print(this_conds)
+            # print(this_conds)
             if len(this_conds) == max_num_conds - 1:
                 # print('inside')
                 this_conditions_ELBO_plus_one, RCL_one_cond, KLD_one_cond = per_condition_loss(d.clone(), c.clone(), this_conds.copy(), model, args, idx=5)
@@ -119,13 +119,13 @@ def GreedyVisualizeEncoder(args, model, conds, c, d, kl_per_lt=None, kl_all_lt=N
                 first_features['KLD'].append(KLD_one_cond)
             else:
                 this_conditions_ELBO_plus_one = per_condition_loss(d.clone(), c.clone(), this_conds.copy(), model, args)
-            ELBO_diff = np.abs(this_conditions_ELBO - this_conditions_ELBO_plus_one)
+            ELBO_diff = this_conditions_ELBO - this_conditions_ELBO_plus_one
             # print(ELBO_diff)
             if ELBO_diff > max_ELBO_diff:
                 max_ELBO_diff = ELBO_diff
                 most_important_cond = this_conds
                 popped_cond = conds[i]
-        print('after loop', most_important_cond, popped_cond)
+        # print('after loop', most_important_cond, popped_cond)
         recon_batch, z_means, log_var = per_condition_loss(d.clone(), c.clone(), most_important_cond.copy(), model, args, idx = 2)
         
         kl_per_lt, kl_all_lt, selected_features = make_dataframe(kl_per_lt, kl_all_lt, selected_features, feature_names, z_means, c.clone(), recon_batch, log_var, most_important_cond, popped_cond, args)

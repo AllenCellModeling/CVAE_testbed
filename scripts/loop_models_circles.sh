@@ -1,8 +1,8 @@
 CVAE_train \
-	--gpu_id 1 \
-	--path_save_dir ./outputs/loop_models_blobs/ \
+	--gpu_id 0 \
+	--path_save_dir ./outputs/loop_models_circles/ \
 	--model_fn CVAE_testbed.models.CVAE_baseline.CVAE \
-    --model_kwargs '{"x_dim": 2, "c_dim": 4, "enc_layers": [2, 64, 64,64, 64, 64], "dec_layers": [64, 64, 64, 64, 64, 2], "sklearn_data": "blobs"}' \
+    --model_kwargs '{"x_dim": 2, "c_dim": 4, "enc_layers": [2, 64, 64, 64, 64, 64], "dec_layers": [64, 64, 64, 64, 64, 2], "sklearn_data": "circles"}' \
 	--post_plot_kwargs '{"latent_space_colorbar": "no"}'\
     --beta_vae 1 \
     --C_vae 0 \
@@ -16,9 +16,9 @@ CVAE_train \
 
 # CVAE_train \
 # 	--gpu_id 0 \
-# 	--path_save_dir ./outputs/loop_models_blobs/ \
+# 	--path_save_dir ./outputs/loop_models_circles/ \
 # 	--model_fn CVAE_testbed.models.CVAE_dense.CVAE \
-#     --model_kwargs '{"sklearn_data": "blobs",
+#     --model_kwargs '{"sklearn_data": "circles", 
 #                 "enc_layers": [[6,32,32,32,128],
 #                 [128,32,32,32,256],
 #                 [256,32,32,32,512]],

@@ -4,6 +4,7 @@ from torch.distributions import MultivariateNormal
 import numpy as np
 import sklearn
 from sklearn import preprocessing
+from scipy import stats
 
 class ProjectedSyntheticDataset(Dataset):
     def __init__(self, num_batches, BATCH_SIZE, model_kwargs, shuffle=True, corr=False, train=True, P = None, mask=False):
@@ -47,6 +48,11 @@ class ProjectedSyntheticDataset(Dataset):
             # X = torch.from_numpy(std_scaler.fit_transform(X.cpu().numpy())).cuda()
             # X = torch.from_numpy(sklearn.preprocessing.normalize(X.cpu().numpy(), axis=0)).cuda()
             X = X.t()
+
+            # TRY ZSCOREING
+            # X = torch.from_numpy(stats.zscore(X.cpu().numpy())).cuda()
+
+
             C = X.clone().cuda()
             count = 0
             if self.shuffle is True:
@@ -104,20 +110,24 @@ class ProjectedSyntheticDataset(Dataset):
     
     def get_projection_matrix(self):
         return self._P
+
+    def get_color(self):
+        return None
     
     def generate_projection_matrix(self):
         P = torch.zeros([self.model_kwargs['projection_dim'], self.model_kwargs['projection_dim']])
         col = 0
         for row in range(P.size()[0]):
             # col = torch.randint(0,self.model_kwargs['x_dim'],(1,)).item()
-            #P[row][col] = torch.randn(1).item()
+            # P[row][col] = torch.randn(1).item()
             P[row][col] = 1
+            # P[row][col] = 1 
             if col != self.model_kwargs['x_dim'] - 1:
                 col += 1
             else:
                 col = 0
             # P[row][col] = 1
-        print(P)
+        # print(P)
         return P
 
     def random_corr_mat(self, D=10, beta=1):
