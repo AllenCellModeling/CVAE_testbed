@@ -25,24 +25,6 @@ def make_plot_encoding_greedy(args: argparse.Namespace, model, df: pd.DataFrame,
     except:
         conds = [i for i in range(args.model_kwargs["dec_layers"][-1])]
 
-    # make_data = str_to_object(args.dataloader)
-
-    # if proj_matrix is not None:
-    #     this_dataloader = make_data(
-    #                         1, args.batch_size*5, args.model_kwargs, shuffle=False, P = proj_matrix
-    #                                )
-    # elif args.data_type == 'aics_features':
-    #     this_dataloader = make_data(
-    #                         args.num_batches, args.batch_size, args.model_kwargs, shuffle=False
-    #                                )
-    # else:
-    #     this_dataloader = make_data(
-    #         1, args.batch_size*5, args.model_kwargs, shuffle=False
-    #                                )
-
-
-    # c, d, _, _ = this_dataloader.get_all_items()
-
     kl_per_lt, kl_all_lt, selected_features, first_features = vis_enc(
         args,
         model,
@@ -82,52 +64,38 @@ def make_plot_encoding_greedy(args: argparse.Namespace, model, df: pd.DataFrame,
         fig.savefig(path_save_fig, bbox_inches="tight")
         LOGGER.info(f"Saved: {path_save_fig}")
 
-    # kld_per_dim = pd.pivot_table(kl_per_lt, values='kl_divergence', index='popped_cond', columns = 'latent_dim', aggfunc=np.mean)
-
-    # rcl_per_dim = pd.pivot_table(kl_per_lt, values='rcl', index='popped_cond', columns = 'latent_dim', aggfunc=np.mean)
-
-    # elbo_per_dim = pd.pivot_table(kl_per_lt, values='elbo', index='popped_cond', columns = 'latent_dim', aggfunc=np.mean)
-
-
     fig2, ax= plt.subplots(1, 1, figsize=(7 * 8, 4))
     first_features.sort_values(by='ELBO', ascending=False, inplace=True)
-    # print(first_features)
+
     if all(pd.isna(first_features['selected_feature_name'])):
         bar_fig = sns.lineplot(data=first_features, ax=ax, x='selected_feature_number', y='ELBO', label='ELBO', sort=False)
         sns.scatterplot(data=first_features, ax=ax, x='selected_feature_number', y='ELBO', s=100, color=".2")
         sns.lineplot(data=first_features, ax=ax, x='selected_feature_number', y='RCL', label='RCL', sort=False)
         sns.scatterplot(data=first_features, ax=ax, x='selected_feature_number', y='RCL', s=100, color=".2")
-        # sns.barplot(data=first_features, ax=ax3, x='selected_feature_number', y='KLD')
     else:
         bar_fig = sns.lineplot(data=first_features, ax=ax, x='selected_feature_name', y='ELBO', label="ELBO", sort=False)
         sns.scatterplot(data=first_features, ax=ax, x='selected_feature_name', y='ELBO', s=100, color=".2")
         sns.lineplot(data=first_features, ax=ax, x='selected_feature_name', y='RCL', label="RCL", sort=False)
         sns.scatterplot(data=first_features, ax=ax, x='selected_feature_name', y='RCL', s=100, color=".2")
-        # sns.barplot(data=first_features, ax=ax3, x='selected_feature_name', y='KLD')
 
     for item in bar_fig.get_xticklabels():
         item.set_rotation(45)
 
     ax.set_title('ELBO per selected first feature')  
-    # ax2.set_title('RCL per selected first feature')
-    # ax3.set_title('KLD per selected first feature')
     ax.set_xlabel('Selected feature')
     ax.set_ylabel('ELBO')
-    # ax2.set_xlabel('Selected feature')
-    # ax2.set_ylabel('RCL')
-    # ax3.set_xlabel('Selected feature')
-    # ax3.set_ylabel('KLD')
+
     if save is True:
         path_save_fig = path_save_dir / Path("greedy_barplots_first_selection.png")
         fig2.savefig(path_save_fig, bbox_inches="tight")
         LOGGER.info(f"Saved: {path_save_fig}")
 
-
     fig2, ax = plt.subplots(1, 1, figsize=(7 * 8, 4))
 
-
     selected_features.sort_values(by='ELBO', ascending=False, inplace=True)
+
     print(selected_features)
+    
     if all(pd.isna(selected_features['selected_feature_name'])):
         bar_fig = sns.lineplot(data=selected_features, ax=ax, x='selected_feature_number', y='ELBO', label='ELBO', sort=False)
         sns.scatterplot(data=selected_features, ax=ax, x='selected_feature_number', y='ELBO', s=100, color=".2")

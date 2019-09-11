@@ -120,8 +120,8 @@ class ProjectedSyntheticDataset(Dataset):
         for row in range(P.size()[0]):
             # col = torch.randint(0,self.model_kwargs['x_dim'],(1,)).item()
             # P[row][col] = torch.randn(1).item()
-            P[row][col] = 1
-            # P[row][col] = 1 
+            P[row][col] = 1 + torch.randn(1).item()/100
+            # P[row][col] = 1
             if col != self.model_kwargs['x_dim'] - 1:
                 col += 1
             else:

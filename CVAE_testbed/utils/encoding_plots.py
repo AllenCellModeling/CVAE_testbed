@@ -66,23 +66,6 @@ def make_plot_encoding(
         this_kwargs = args.model_kwargs["dec_layers"][-1][-1]
     except:
         this_kwargs = args.model_kwargs["dec_layers"][-1]
-    # make_data = str_to_object(args.dataloader)
-
-    # if proj_matrix is not None:
-    #     this_dataloader = make_data(
-    #                         1, args.batch_size*5, args.model_kwargs, shuffle=False, P = proj_matrix
-    #                                )
-    # elif args.data_type == 'aics_features':
-    #     this_dataloader = make_data(
-    #                         args.num_batches, args.batch_size, args.model_kwargs, shuffle=False
-    #                                )
-    # else:
-    #     this_dataloader = make_data(
-    #         1, args.batch_size*5, args.model_kwargs, shuffle=False
-    #                                )
-
-
-    # c, d, _, _ = this_dataloader.get_all_items()
 
     conds = [i for i in range(this_kwargs)]
     # if len(conds) > 20:

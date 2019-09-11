@@ -55,18 +55,13 @@ def make_plot_FID(args: argparse.Namespace, model, X_test, C_test, save=True):
 
         print(len(torch.nonzero(cond_d)))
 
-        four_fids = []
 
         try:
             this_fid = compute_fid(X_test.clone(), cond_d.clone(), args, model, conds)
-            four_fids.append(this_fid)
         except:
             this_fid = np.NaN
-            four_fids.append(this_fid)
         print('fid', this_fid)
-        this_fid = np.mean(four_fids)
                 
-
         fid_data['num_conds'].append(X_test.size()[-1] - len(conds))
         fid_data['fid'].append(this_fid)
 
