@@ -102,7 +102,10 @@ and so on.
 
 Projecting 2 dimensions to 8 dimensions gives 
 
-![baseline_proj_2_8](./scripts/outputs/baseline_results_projected/encoding_test_plots.png)
+.. image:: scripts/outputs/baseline_results_projected/encoding_test_plots.png
+   :width: 750px
+   :scale: 100 %
+   :align: center
 
 This plot can be viewed in outputs/baseline_results_projected. The model uses only 2 dimensions in the latent space to encode information from a 4 dimensional input dataset. 
 
@@ -158,7 +161,10 @@ The swiss roll dataset is parametrized as:
 
 Despite having 3 dimensions, it is parametrized by 2 dimensions. Running this script gives
 
-![baseline_swissroll](scripts/outputs/baseline_results_swissroll/encoding_test_plots.png)
+.. image:: scripts/outputs/baseline_results_swissroll/encoding_test_plots.png
+   :width: 750px
+   :scale: 100 %
+   :align: center
 
 This plot can be viewed in outputs/baseline_results_swissroll. We observe that given 0 conditions (blue), the model gets embedded into only dimensions in the latent space. Providing 1 condition (X) is no different then providing 2 conditions (X and Y) since both X and Y are parameterized by only 1 dimension. Finally, providing both conditions means that no information passes throught the bottleneck and the model encodes no information. 
 
@@ -170,11 +176,17 @@ This plot can be viewed in outputs/baseline_results_swissroll. We observe that g
 
 The type of dataset (i.e. circles, moons, blobs or an s_curve) is specified in "sklearn_data" in baseline_kwargs_circles_moons_blobs.json. Running this file for blobs gives 
 
-![blobs](scripts/outputs/loop_models_blobs/encoding_test_plots.png)
+.. image:: scripts/outputs/loop_models_blobs/encoding_test_plots.png
+   :width: 750px
+   :scale: 100 %
+   :align: center
 
 Similarly for moons gives 
 
-![moons](scripts/outputs/loop_models_moons/encoding_test_plots.png)
+.. image:: scripts/outputs/loop_models_moons/encoding_test_plots.png
+   :width: 750px
+   :scale: 100 %
+   :align: center
 
 This is how the original data maps to the latent space
 
@@ -185,11 +197,17 @@ This is how the original data maps to the latent space
 
 Similarly for an s_curve gives 
 
-![s_curve](scripts/outputs/loop_models_s_curve/encoding_test_plots.png)
+.. image:: scripts/outputs/loop_models_s_curve/encoding_test_plots.png
+   :width: 750px
+   :scale: 100 %
+   :align: center
 
 And for circles gives
 
-![circles](scripts/outputs/loop_models_circles/encoding_test_plots.png)
+.. image:: scripts/outputs/loop_models_circles/encoding_test_plots.png
+   :width: 750px
+   :scale: 100 %
+   :align: center
 
 * Run compare_models.py to compare results across output folders
 
@@ -210,7 +228,10 @@ Usage: AICS feature data
 
 Here is what the encoding looks like for a beta of 1
 
-![aics_159_features_beta_1](scripts/outputs/aics_159_features_beta_1/encoding_test_plots.png)
+.. image:: scripts/outputs/aics_159_features_beta_1/encoding_test_plots.png
+   :width: 750px
+   :scale: 100 %
+   :align: center
 
 There is no information passing through the information bottleneck, i.e. the KL divergence term is near 0 and the model is close to the autoencoding limit. 
 
