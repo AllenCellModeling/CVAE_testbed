@@ -9,6 +9,7 @@ from pathlib import Path
 
 LOGGER = logging.getLogger(__name__)
 
+
 def get_PCA_features(args, test_dataloader, save=True):
     """
     Return the features that explain a minimum
@@ -40,20 +41,16 @@ def get_PCA_features(args, test_dataloader, save=True):
     model = PCA(n_components=i).fit(x_features)
     x_pc = model.transform(x_features)
     n_pcs = model.components_.shape[0]
-        # if np.sum(model.explained_variance_ratio_) > min_variance:
-        #     break
-    
+ 
     most_important = [
         np.abs(model.components_[i]).argmax()
         for i in range(n_pcs)
-                        ]  
-     
+                     ]
 
     try:
         initial_features_names = all_features.columns.values
     except:
         initial_features_names = [i for i in range(args.model_kwargs['enc_layers'][0])]
-
 
     most_important_names = [
         initial_features_names[most_important[i]]
@@ -71,7 +68,7 @@ def get_PCA_features(args, test_dataloader, save=True):
     df = pd.DataFrame(dic)
 
     if save is True:
-        path_csv = path_save_dir / Path("pca.csv")  
+        path_csv = path_save_dir / Path("pca.csv")
         df.to_csv(path_csv)
         LOGGER.info(f"Saved: {path_csv}")
 

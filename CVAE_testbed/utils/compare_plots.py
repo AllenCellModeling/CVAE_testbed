@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import json
 sns.set_context('paper')
-sns.set(font_scale = 1) 
+sns.set(font_scale=1)
 palette = sns.color_palette("mako_r", 10)
 
 
@@ -82,7 +82,7 @@ def plot_single_model_multiple_epoch(
             sns.scatterplot(ax=ax, data=compare_plot_df, x='distortion', y='rate',
                             hue='conds', style='model', s=200, legend=False)
         else:
-            sns.scatterplot(ax=ax, data=compare_plot_df, x='distortion', y='rate', 
+            sns.scatterplot(ax=ax, data=compare_plot_df, x='distortion', y='rate',
                             hue='conds', style='model',
                             s=200)
 
@@ -96,12 +96,12 @@ def plot_single_model_multiple_epoch(
         else:
             sns.lineplot(
                 ax=ax, data=compare_plot_df, x='distortion', y='rate', color='black',
-                hue = 'epoch',palette="ch:2.5,.25", legend=False
+                hue='epoch', palette="ch:2.5,.25", legend=False
                         )
     else:
         sns.lineplot(
             ax=ax, data=compare_plot_df, x='distortion', y='rate', color='black',
-            hue='epoch',palette="ch:2.5,.25"
+            hue='epoch', palette="ch:2.5,.25"
                     )
 
     plt.legend(loc='upper left')
@@ -115,7 +115,7 @@ def plot_single_model_multiple_epoch(
 def plot_multiple_model_multiple_epoch(csv):
     compare_plot_df = {'model': [], 'epoch': [], 'conds': [], 'rate': [], 'distortion': []}
 
-    fig, ax = plt.subplots(figsize = (8,6))
+    fig, ax = plt.subplots(figsize=(8, 6))
     count = 1
     total = len(csv['csv_path'])
     for i, j in zip(csv['save_dir'], csv['csv_path']):
@@ -132,7 +132,7 @@ def compare_plots_best_performing_encoding(csv):
 
     compare_plot_df = {'model': [], 'conds': [], 'rate': [], 'distortion': []}
 
-    fig, ax = plt.subplots(figsize = (8,6))
+    fig, ax = plt.subplots(figsize=(8, 6))
     for j in range(len(csv['csv_path'])):
         # read the j'th csv that we want to compare
         csv_df = pd.read_csv(csv['csv_path'][j])
@@ -168,7 +168,7 @@ def compare_plots_beta(csv, save=True):
 
     compare_plot_df = {'model': [], 'conds': [], 'elbo': [], 'fid': [], 'beta': []}
 
-    fig, (ax, ax1) = plt.subplots(1, 2, figsize = (8*2,6))
+    fig, (ax, ax1) = plt.subplots(1, 2, figsize=(8*2, 6))
     for j in range(len(csv['csv_path_1'])):
         # read the j'th csv that we want to compare
         save_dir = csv['save_dir'][j]
@@ -193,8 +193,8 @@ def compare_plots_beta(csv, save=True):
 
         dataframe_for_lineplot = pd.DataFrame(compare_plot_df)
         dataframe_for_lineplot = dataframe_for_lineplot.loc[dataframe_for_lineplot['model'] == j]
-        sns.lineplot(ax=ax, data = dataframe_for_lineplot, x='beta', y='elbo', color='black', lw=0.5)
-        sns.lineplot(ax=ax1, data = dataframe_for_lineplot, x='beta', y='fid', color='black', lw=0.5)
+        sns.lineplot(ax=ax, data=dataframe_for_lineplot, x='beta', y='elbo', color='black', lw=0.5)
+        sns.lineplot(ax=ax1, data=dataframe_for_lineplot, x='beta', y='fid', color='black', lw=0.5)
     compare_plot_df = pd.DataFrame(compare_plot_df)
 
     sns.scatterplot(

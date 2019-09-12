@@ -87,7 +87,7 @@ def compute_generative_metric(
 
         for j in range(lab.size()[0]):
             if color_value is not None:
-                color = torch.randint(color_value+ 1, color_value+2, (1, 1)).item()
+                color = torch.randint(color_value+1, color_value+2, (1, 1)).item()
             else:
                 color = torch.randint(1, 4, (1, 1)).item()
             other_indices = []
@@ -158,7 +158,7 @@ def compute_generative_metric(
         images = im[:5, :, :, :]
         gen_images = generated_x[:5, :, :, :]
 
-        grid = torchvision.utils.make_grid(images, nrow=5)       
+        grid = torchvision.utils.make_grid(images, nrow=5)  
         grid2 = torchvision.utils.make_grid(gen_images, nrow=5)
 
     return fid, grid.cpu(), grid2.cpu()

@@ -17,12 +17,12 @@ def visualize_encoder_synthetic(args, model, conds, c, d, kl_per_lt=None, kl_vs_
                 "kl_divergence": [],
                 "num_conds": [],
             }
-        
+
         if kl_vs_rcl is None:
             kl_vs_rcl = {
                 "num_conds": [],
                 "KLD": [],
-                "RCL": [], 
+                "RCL": [],
                 "ELBO": []
             }
         all_kl, all_lt = [], []

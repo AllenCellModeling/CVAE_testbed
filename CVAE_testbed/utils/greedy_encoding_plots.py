@@ -10,8 +10,15 @@ from CVAE_testbed.utils import str_to_object
 LOGGER = logging.getLogger(__name__)
 
 
-def make_plot_encoding_greedy(args: argparse.Namespace, model, df: pd.DataFrame, c, d, feature_names=None, save=True, proj_matrix=None
-        ) -> None:
+def make_plot_encoding_greedy(
+                                args: argparse.Namespace,
+                                model, df: pd.DataFrame,
+                                c,
+                                d,
+                                feature_names=None,
+                                save=True,
+                                proj_matrix=None
+                             ) -> None:
     """
     c and d are X_test and C_test
     """
@@ -32,7 +39,7 @@ def make_plot_encoding_greedy(args: argparse.Namespace, model, df: pd.DataFrame,
         c[-1, :].clone(),
         d[-1, :].clone(),
         kl_per_lt=None,
-        kl_all_lt=None, 
+        kl_all_lt=None,
         selected_features=None,
         feature_names=feature_names
     )
@@ -57,14 +64,14 @@ def make_plot_encoding_greedy(args: argparse.Namespace, model, df: pd.DataFrame,
         LOGGER.info(f"Saved: {path_csv}")
 
     fig, ax1 = plt.subplots(1, 1, figsize=(7 * 1, 4))
-    sns.lineplot(ax=ax1, data=kl_per_lt, x = 'latent_dim', y = 'kl_divergence', estimator='mean')
+    sns.lineplot(ax=ax1, data=kl_per_lt, x='latent_dim', y='kl_divergence', estimator='mean')
 
     if save is True:
         path_save_fig = path_save_dir / Path("greedy_elbo_kld_rcl_dims.png")
         fig.savefig(path_save_fig, bbox_inches="tight")
         LOGGER.info(f"Saved: {path_save_fig}")
 
-    fig2, ax= plt.subplots(1, 1, figsize=(7 * 8, 4))
+    fig2, ax = plt.subplots(1, 1, figsize=(7 * 8, 4))
     first_features.sort_values(by='ELBO', ascending=False, inplace=True)
 
     if all(pd.isna(first_features['selected_feature_name'])):
@@ -92,10 +99,10 @@ def make_plot_encoding_greedy(args: argparse.Namespace, model, df: pd.DataFrame,
 
     fig2, ax = plt.subplots(1, 1, figsize=(7 * 8, 4))
 
+    print(selected_features)
+
     selected_features.sort_values(by='ELBO', ascending=False, inplace=True)
 
-    print(selected_features)
-    
     if all(pd.isna(selected_features['selected_feature_name'])):
         bar_fig = sns.lineplot(data=selected_features, ax=ax, x='selected_feature_number', y='ELBO', label='ELBO', sort=False)
         sns.scatterplot(data=selected_features, ax=ax, x='selected_feature_number', y='ELBO', s=100, color=".2")
@@ -109,7 +116,7 @@ def make_plot_encoding_greedy(args: argparse.Namespace, model, df: pd.DataFrame,
 
     for item in bar_fig.get_xticklabels():
         item.set_rotation(45)
-    
+
     ax.set_title('ELBO per selected feature')
     ax.set_xlabel('Selected feature')
     ax.set_ylabel('ELBO')

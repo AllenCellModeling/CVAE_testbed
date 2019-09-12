@@ -84,7 +84,7 @@ def run_synthetic(
             dataframe["total_test_ELBO"].append(test_rcl + test_kld)
             dataframe["test_rcl"].append(test_rcl_per_cond[j].item())
             dataframe["test_kld"].append(test_kld_per_cond[j].item())
-            #print(j, 'TEST ELBO', test_rcl + test_kld, 'TEST KLD per dim', test_kld_per_cond[j].item())
+            # print(j, 'TEST ELBO', test_rcl + test_kld, 'TEST KLD per dim', test_kld_per_cond[j].item())
 
         stats = pd.DataFrame(dataframe)
         # print(X_train.size())
@@ -137,14 +137,14 @@ def train(
 
         if args.model_fn == 'CVAE_testbed.models.CVAE_baseline_2.CVAE':
             recon_batch, z1, mu, log_var, mu2, log_var2, z2, z1_prior = model(c.cuda(gpu_id), d.cuda(gpu_id))
-    
+
             loss_fn = str_to_object(args.loss_fn)
             loss, rcl, kld, rcl_per_element, kld_per_element = loss_fn(
                 c.cuda(gpu_id), recon_batch.cuda(gpu_id), z1, z1_prior, z2, [mu, log_var], [mu2, log_var2], args
             )
         else:
             recon_batch, mu, log_var = model(c.cuda(gpu_id), d.cuda(gpu_id))
-        
+
             loss_fn = str_to_object(args.loss_fn)
             loss, rcl, kld, rcl_per_element, kld_per_element = loss_fn(
                 c.cuda(gpu_id), recon_batch.cuda(gpu_id), mu, log_var, args

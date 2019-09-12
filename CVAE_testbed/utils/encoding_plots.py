@@ -12,9 +12,17 @@ from CVAE_testbed.utils import str_to_object
 
 LOGGER = logging.getLogger(__name__)
 
+
 def make_plot_encoding(
-        args: argparse.Namespace, model, df: pd.DataFrame, c, d, this_dataloader_color=None, save=True, proj_matrix=None
-        ) -> None:
+        args: argparse.Namespace,
+        model,
+        df: pd.DataFrame,
+        c,
+        d,
+        this_dataloader_color=None,
+        save=True,
+        proj_matrix=None
+                      ) -> None:
     """
     c and d are X_test and C_test
     """
@@ -27,15 +35,15 @@ def make_plot_encoding(
         conds = [i for i in range(args.model_kwargs["dec_layers"][-1][-1])]
     except:
         conds = [i for i in range(args.model_kwargs["dec_layers"][-1])]
-    
+ 
     try:
         latent_dims = args.model_kwargs["vae_layers"][-1][-1]
     except:
         latent_dims = args.model_kwargs["enc_layers"][-1]
 
-    fig, ax = plt.subplots(1,1,figsize = (7, 5))
-    sns.lineplot(ax=ax, data = df, x="epoch", y="total_train_ELBO")
-    sns.lineplot(ax=ax, data = df, x="epoch", y="total_test_ELBO")
+    fig, ax = plt.subplots(1, 1, figsize=(7, 5))
+    sns.lineplot(ax=ax, data=df, x="epoch", y="total_train_ELBO")
+    sns.lineplot(ax=ax, data=df, x="epoch", y="total_test_ELBO")
     ax.set_ylim([0, df.total_test_ELBO.quantile(0.95)])
     ax.legend(["Train loss", "Test loss"])
     ax.set_ylabel('Loss')
@@ -195,7 +203,6 @@ def make_plot_encoding(
     bax.set_ylabel("KLD")
     bax.set_title("KLD per latent dim")
 
-
     conds = [i for i in range(this_kwargs)]
     if len(conds) > 30:
         ax.get_legend().remove()
@@ -223,8 +230,6 @@ def colormap_plot(
     
     color = color.cpu().numpy().astype(np.int32)
 
-
-    # fig, ax = plt.subplots(1, 2, figsize=(7*2,5))
     fig = plt.figure(figsize=(7 * 2, 5))
 
     ax1 = fig.add_subplot(121, projection="3d")

@@ -195,7 +195,7 @@ And for circles gives
 Usage: AICS feature data
 --------
 
-* Run aics feature model. 
+* Run aics feature model. Here we pass 159 features (1 binary, 102 real and 56 one-hot features) through the CVAE
 
 .. code-block:: bash
 
@@ -205,8 +205,13 @@ Usage: AICS feature data
 
     $ ./aics_features_simple.sh
 
+Here is what the encoding looks like for a beta of 1
 
+![aics_159_features_beta_1](scripts/outputs/aics_159_features_beta_1/encoding_test_plots.png?raw=true "aics_159_features_beta_1")
 
+There is no information passing through the information bottleneck, i.e. the KL divergence term is near 0 and the model is close to the autoencoding limit. 
+
+We can vary beta and compare ELBO and FID scores in order to find the best model. 
 
 Organization
 --------

@@ -47,7 +47,7 @@ class CirclesMoonsBlobs(Dataset):
                 mask_indices = torch.cuda.FloatTensor(X.size()[0]).uniform_() > 1 - model_kwargs['mask_percentage']
                 X[mask_indices, 0] = 0
                 X[mask_indices, 1] = 0
-        
+
             C = X.clone()
             count = 0
             if self.shuffle is True:
@@ -78,7 +78,7 @@ class CirclesMoonsBlobs(Dataset):
         self._batches_x = Batches_X
         self._batches_c = Batches_C
         self._batches_conds = Batches_conds
-    
+
     def __len__(self):
         return len(self._batches_x)
 

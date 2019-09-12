@@ -133,7 +133,7 @@ def get_args():
 
     if args.path_save_dir is not None:
         args.path_save_dir = args.path_save_dir
-    else: 
+    else:
         args.path_save_dir = './outputs/' + str(
             datetime.datetime.today().strftime("%Y:%m:%d:%H:%M:%S")
         )
@@ -347,16 +347,29 @@ def train_model():
             # First load non shuffled data
             if proj_matrix is not None:
                 this_dataloader = load_data(
-                                    args.num_batches, args.batch_size, args.model_kwargs, shuffle=False, P = proj_matrix, train=False
+                                    args.num_batches,
+                                    args.batch_size,
+                                    args.model_kwargs,
+                                    shuffle=False,
+                                    P=proj_matrix,
+                                    train=False
                                         )
             elif args.data_type == 'aics_features':
                 this_dataloader = load_data(
-                                    args.num_batches, args.batch_size, args.model_kwargs, shuffle=False, train=False
-                                        )
+                                            args.num_batches,
+                                            args.batch_size,
+                                            args.model_kwargs,
+                                            shuffle=False,
+                                            train=False
+                                           )
             else:
                 this_dataloader = load_data(
-                    args.num_batches, args.batch_size, args.model_kwargs, shuffle=False, train=False
-                                        )
+                                            args.num_batches,
+                                            args.batch_size,
+                                            args.model_kwargs,
+                                            shuffle=False,
+                                            train=False
+                                           )
             X_non_shuffled, C_non_shuffled, _ = this_dataloader.get_all_items()
 
             # Now check encoding

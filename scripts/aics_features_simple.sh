@@ -1,5 +1,5 @@
 CVAE_train \
-    --gpu_id 0 \
+    --gpu_id 1 \
     --path_save_dir ./outputs/aics_159_features_beta_1/ \
     --model_fn CVAE_testbed.models.CVAE_baseline.CVAE \
     --model_kwargs '{"x_dim": 159, "c_dim": 318, "enc_layers": [159, 256, 256,256, 256, 256, 512, 512], "dec_layers": [512, 512, 256, 256, 256, 256, 256, 159]}'\
