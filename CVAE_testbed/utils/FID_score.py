@@ -16,6 +16,9 @@ def make_plot_FID(args: argparse.Namespace, model, X_test, C_test, save=True):
 
     X_test = X_test.view(-1, X_test.size()[-1])
     C_test = C_test.view(-1, C_test.size()[-1])
+    # X_test = X_test[-1,:]
+    # C_test = C_test[-1,:]
+    print(X_test.size(), C_test.size())
 
     sns.set_context("talk")
     path_save_dir = Path(args.path_save_dir)
@@ -36,7 +39,7 @@ def make_plot_FID(args: argparse.Namespace, model, X_test, C_test, save=True):
 
     fid_data = {'num_conds': [], 'fid': []}
 
-    print(conds)
+    print(len(conds))
 
     for i in range(len(conds) + 1):
 
@@ -49,11 +52,14 @@ def make_plot_FID(args: argparse.Namespace, model, X_test, C_test, save=True):
             tmp1[:, int(kk)], tmp2[:, int(kk)] = 0, 0
         cond_d = torch.cat((tmp1, tmp2), 1)
 
+        print(len(torch.nonzero(cond_d)))
+
         try:
-            this_fid = compute_fid(X_test.clone(), cond_d.clone(), args, model)
+            this_fid = compute_fid(X_test.clone(), cond_d.clone(), args, model, conds)
         except:
             this_fid = np.NaN
-
+        print('fid', this_fid)
+          
         fid_data['num_conds'].append(X_test.size()[-1] - len(conds))
         fid_data['fid'].append(this_fid)
 
@@ -64,7 +70,7 @@ def make_plot_FID(args: argparse.Namespace, model, X_test, C_test, save=True):
 
     fid_data = pd.DataFrame(fid_data)
 
-    fig, ax = plt.subplots(1, 1, figsize=(7, 5))
+    fig, ax = plt.subplots(1, 1, figsize=(7*4, 5))
     sns.lineplot(ax=ax, data=fid_data, x='num_conds', y='fid')
     sns.scatterplot(ax=ax, data=fid_data, x='num_conds', y='fid', s=100, color=".2")
 
@@ -76,5 +82,3 @@ def make_plot_FID(args: argparse.Namespace, model, X_test, C_test, save=True):
         path_save_fig = path_save_dir / Path("fid_score.png")
         fig.savefig(path_save_fig, bbox_inches="tight")
         LOGGER.info(f"Saved: {path_save_fig}")
-    
-

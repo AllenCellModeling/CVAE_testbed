@@ -1,7 +1,7 @@
 CVAE_train \
-	--gpu_id 0 \
-	--path_save_dir ./outputs/baseline_results_swissroll_with_mask/ \
-	--model_fn CVAE_testbed.models.CVAE_residual.CVAE \
+	--gpu_id 1 \
+	--path_save_dir ./outputs/baseline_results_swissroll_plus_mask/ \
+	--model_fn CVAE_testbed.models.CVAE_baseline.CVAE \
     --model_kwargs baseline_swissroll_kwargs_with_mask.json \
 	--batch_size 64  \
     --num_batches 500  \

@@ -1,6 +1,6 @@
 CVAE_train \
-    --gpu_id 0 \
-    --path_save_dir ./outputs/aics_features/159_features/new2/ \
+    --gpu_id 1 \
+    --path_save_dir ./outputs/aics_159_features_beta_1/ \
     --model_fn CVAE_testbed.models.CVAE_baseline.CVAE \
     --model_kwargs '{"x_dim": 159, "c_dim": 318, "enc_layers": [159, 256, 256,256, 256, 256, 512, 512], "dec_layers": [512, 512, 256, 256, 256, 256, 256, 159]}'\
     --json_quilt_path '/home/ritvik.vasan/test/'\
@@ -13,7 +13,7 @@ CVAE_train \
             "one_hot_loss": "CE"}'\
     --batch_size 64  \
     --num_batches 1000  \
-    --beta_vae 0.7 \
+    --beta_vae 1 \
     --n_epochs 30 \
     --data_type 'aics_features' \
     --dataloader CVAE_testbed.datasets.quilt_aics_features.QuiltAicsFeatures \

@@ -131,9 +131,12 @@ def get_args():
     )
     args = parser.parse_args()
 
-    args.path_save_dir = args.path_save_dir + str(
-        datetime.datetime.today().strftime("%Y:%m:%d:%H:%M:%S")
-    )
+    if args.path_save_dir is not None:
+        args.path_save_dir = args.path_save_dir
+    else:
+        args.path_save_dir = './outputs/' + str(
+            datetime.datetime.today().strftime("%Y:%m:%d:%H:%M:%S")
+        )
     return args
 
 
@@ -168,7 +171,7 @@ def get_model(model_fn, model_kwargs: Optional[Dict] = None) -> nn.Module:
             [
                 (key, value)
                 for key, value in model_kwargs.items()
-                if key != "sklearn_data" and key != 'projection_dim'
+                if key != "sklearn_data" and key != 'projection_dim' and key != 'mask_percentage'
             ]
         )
         return model_fn(**a)
@@ -207,6 +210,7 @@ def train_model():
     LOGGER.info(f"Using device: {device}")
 
     feature_names = None
+    proj_matrix = None
 
     if args.data_type == "mnist":
         load_data = str_to_object(args.dataloader)
@@ -215,7 +219,7 @@ def train_model():
             )
     elif args.data_type == "aics_features":
         load_data = str_to_object(args.dataloader)
-        aics_instance = load_data(
+        test_instance = load_data(
             args.num_batches,
             args.batch_size,
             args.model_kwargs,
@@ -223,11 +227,12 @@ def train_model():
             train=True,
             mask=False,
         )
-        X_train, C_train, Cond_indices_train = aics_instance.get_train_data()
-        X_test, C_test, Cond_indices_test = aics_instance.get_test_data()
-        feature_names = aics_instance.get_feature_names()
-        print('CVAE train')
-        print(X_train.size(), X_test.size())
+        X_train, C_train, Cond_indices_train = test_instance.get_train_data()
+        X_test, C_test, Cond_indices_test = test_instance.get_test_data()
+        feature_names = test_instance.get_feature_names()
+        this_dataloader_color = test_instance.get_color()
+        # print('CVAE train')
+        # print(X_train.size(), X_test.size())
     elif args.data_type == "synthetic":
         if "mask_percentage" in args.model_kwargs:
             mask_bool = True
@@ -248,15 +253,17 @@ def train_model():
             with path_csv.open("wb") as fo:
                 torch.save(proj_matrix, fo)
             LOGGER.info(f"Saved: {path_csv}")
-            X_test, C_test, Cond_indices_test = load_data(
-                args.num_batches,
-                args.batch_size,
-                args.model_kwargs,
-                corr=False,
-                train=False,
-                P=proj_matrix,
-                mask=mask_bool,
-            ).get_all_items()
+            test_instance = load_data(
+                                        args.num_batches,
+                                        args.batch_size,
+                                        args.model_kwargs,
+                                        corr=False,
+                                        train=False,
+                                        P=proj_matrix,
+                                        mask=mask_bool,
+                                     )
+            X_test, C_test, Cond_indices_test = test_instance.get_all_items()
+            this_dataloader_color = test_instance.get_color()
         else:
             X_train, C_train, Cond_indices_train, _ = load_data(
                 args.num_batches,
@@ -266,14 +273,16 @@ def train_model():
                 train=True,
                 mask=mask_bool,
             ).get_all_items()
-            X_test, C_test, Cond_indices_test = load_data(
-                args.num_batches,
-                args.batch_size,
-                args.model_kwargs,
-                corr=False,
-                train=False,
-                mask=mask_bool,
-            ).get_all_items()
+            test_instance = load_data(
+                                        args.num_batches,
+                                        args.batch_size,
+                                        args.model_kwargs,
+                                        corr=False,
+                                        train=False,
+                                        mask=mask_bool,
+                                      )
+            X_test, C_test, Cond_indices_test = test_instance.get_all_items()
+            this_dataloader_color = test_instance.get_color()
 
     model = get_model(args.model_fn, args.model_kwargs).to(device)
     opt = optim.Adam(model.parameters(), lr=args.lr)
@@ -287,6 +296,9 @@ def train_model():
             )
     make_plot = str_to_object(
             "CVAE_testbed.utils.loss_and_image_plots.make_plot"
+            )
+    pca = str_to_object(
+            "CVAE_testbed.utils.pca.get_PCA_features"
             )
 
     make_fid_plot = str_to_object(
@@ -330,10 +342,42 @@ def train_model():
             args.model_kwargs,
         )
         if args.data_type == 'aics_features' or args.data_type == 'synthetic':
-            make_plot_encoding_greedy(args, model, stats, X_test, C_test, feature_names)
-            make_plot_encoding(args, model, stats, X_test, C_test)
+            print(proj_matrix)
+
+            # First load non shuffled data
+            if proj_matrix is not None:
+                this_dataloader = load_data(
+                                    args.num_batches,
+                                    args.batch_size,
+                                    args.model_kwargs,
+                                    shuffle=False,
+                                    P=proj_matrix,
+                                    train=False
+                                        )
+            elif args.data_type == 'aics_features':
+                this_dataloader = load_data(
+                                            args.num_batches,
+                                            args.batch_size,
+                                            args.model_kwargs,
+                                            shuffle=False,
+                                            train=False
+                                           )
+            else:
+                this_dataloader = load_data(
+                                            args.num_batches,
+                                            args.batch_size,
+                                            args.model_kwargs,
+                                            shuffle=False,
+                                            train=False
+                                           )
+            X_non_shuffled, C_non_shuffled, _ = this_dataloader.get_all_items()
+
+            # Now check encoding
+            make_plot_encoding(args, model, stats, X_non_shuffled.clone(), C_non_shuffled.clone(), this_dataloader_color, True, proj_matrix)
+            pca_dataframe = pca(args, this_dataloader, True)
+            make_plot_encoding_greedy(args, model, stats,  X_non_shuffled.clone(), C_non_shuffled.clone(), feature_names, True, proj_matrix)
             try:
-                make_fid_plot(args, model, X_test[:, :], C_test[:, :])
+                make_fid_plot(args, model,  X_non_shuffled.clone(), C_non_shuffled.clone())
             except:
                 pass
         else:

@@ -8,6 +8,7 @@ import seaborn as sns
 
 LOGGER = logging.getLogger(__name__)
 
+
 def make_plot(
         df: pd.DataFrame,
         df2: pd.DataFrame,

@@ -26,7 +26,7 @@ class CVAE(nn.Module):
                 encoder_layers.append(nn.Linear(i, k))
                 encoder_layers.append(nn.BatchNorm1d(k))
                 encoder_layers.append(nn.ReLU())
-                
+
         self.encoder_net = nn.Sequential(*encoder_layers)
         self.encoder_net.apply(weight_init)
         # decoder part
@@ -42,8 +42,8 @@ class CVAE(nn.Module):
             else:
                 decoder_layers.append(nn.Linear(i, k))
                 decoder_layers.append(nn.BatchNorm1d(k))
-                decoder_layers.append(nn.ReLU())
-                
+                decoder_layers.append(nn.ReLU())      
+                   
         self.decoder_net = nn.Sequential(*decoder_layers)
         self.decoder_net.apply(weight_init)
 

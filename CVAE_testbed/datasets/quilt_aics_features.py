@@ -166,13 +166,15 @@ class QuiltAicsFeatures(Dataset):
         # This is mean, std normalization
         non_categorical_dataframe = non_categorical_dataframe.iloc[:, :]
 
-        print(non_categorical_dataframe.shape)
+        # print(non_categorical_dataframe.shape)
 
         self._feature_names = [
             i for i in non_categorical_dataframe.columns
             ] + [
                 i for i in one_hot_categorical_features.columns
                 ]
+
+        num_training_samples = 33000
 
         x = non_categorical_dataframe.values
         std_scaler = preprocessing.StandardScaler()
@@ -181,18 +183,18 @@ class QuiltAicsFeatures(Dataset):
             x[:, 1:model_kwargs["x_dim"]+1]
             )
         x_train_scaled = std_scaler.fit_transform(
-            x[:30000, 1:model_kwargs["x_dim"]+1]
+            x[:num_training_samples, 1:model_kwargs["x_dim"]+1]
             )
         x_test_scaled = std_scaler.transform(
-            x[30000:, 1:model_kwargs["x_dim"]+1]
+            x[num_training_samples:, 1:model_kwargs["x_dim"]+1]
             )
 
         if model_kwargs["x_dim"] > 103:
             non_categorical_train = pd.DataFrame(
-                np.concatenate((x[:30000, 0:1], x_train_scaled), axis=1)
+                np.concatenate((x[:num_training_samples, 0:1], x_train_scaled), axis=1)
                 )
             non_categorical_test = pd.DataFrame(
-                np.concatenate((x[30000:, 0:1], x_test_scaled), axis=1)
+                np.concatenate((x[num_training_samples:, 0:1], x_test_scaled), axis=1)
                 )
             non_categorical_train_and_test = pd.DataFrame(
                 np.concatenate((x[:, 0:1], x_train_and_test_scaled), axis=1)
@@ -229,11 +231,11 @@ class QuiltAicsFeatures(Dataset):
 
         if model_kwargs["x_dim"] > 103:
             X_train_whole_batch = torch.cat(
-                (X_train_whole_batch, all_categorical_X[:30000, :]),
+                (X_train_whole_batch, all_categorical_X[:num_training_samples, :]),
                 1
                 )
             X_test_whole_batch = torch.cat(
-                (X_test_whole_batch, all_categorical_X[30000:, :]),
+                (X_test_whole_batch, all_categorical_X[num_training_samples:, :]),
                 1
                 )
 
@@ -250,8 +252,8 @@ class QuiltAicsFeatures(Dataset):
             if X_train.size()[0] != self.BATCH_SIZE:
                 break
 
-            print(X_train.size(), X_test.size())
-            print(Batches_X_train.size(), Batches_X_test.size())
+            # print(X_train.size(), X_test.size())
+            # print(Batches_X_train.size(), Batches_X_test.size())
 
             self._color = X_train[:, 0]
 
@@ -381,7 +383,7 @@ class QuiltAicsFeatures(Dataset):
             n_pcs = model.components_.shape[0]
             if np.sum(model.explained_variance_ratio_) > min_variance:
                 break
-      
+
         most_important = [
             np.abs(model.components_[i]).argmax()
             for i in range(n_pcs)

@@ -4,10 +4,11 @@ from torch.distributions import MultivariateNormal
 import numpy as np
 from sklearn import manifold, datasets
 
+
 class SwissRoll(Dataset):
     def __init__(self, num_batches, BATCH_SIZE, model_kwargs, shuffle=True, corr=False, train=True, mask=False):
         """
-        Args: 
+        Args:
             num_batches: Number of batches of synthetic data
             BATCH_SIZE: batchsize of synthetic data
             model_kwargs: dictionary containing "x_dim" which indicates input data size
@@ -21,15 +22,15 @@ class SwissRoll(Dataset):
         self.model_kwargs = model_kwargs
         self.train = train
 
-        Batches_X, Batches_C, Batches_conds = torch.empty([0]) ,torch.empty([0]), torch.empty([0])
+        Batches_X, Batches_C, Batches_conds = torch.empty([0]), torch.empty([0]), torch.empty([0])
 
         for j, i in enumerate(range(self.num_batches)):
 
             # set parameters
-            length_phi = 15   #length of swiss roll in angular direction
-            length_Z = 15     #length of swiss roll in z direction
-            sigma = 0.1       #noise strength
-            m = self.BATCH_SIZE         #number of samples
+            length_phi = 15   # length of swiss roll in angular direction
+            length_Z = 15     # length of swiss roll in z direction
+            sigma = 0.1       # noise strength
+            m = self.BATCH_SIZE         # number of samples
 
             # create dataset
             phi = length_phi*np.random.rand(m)
@@ -49,15 +50,15 @@ class SwissRoll(Dataset):
                 swiss_roll[mask_indices, 1] = 0
                 swiss_roll[mask_indices, 2] = 0
                 swiss_roll[mask_indices, 3] = 0
-        
+
             C = swiss_roll.clone()
             count = 0
             if self.shuffle is True:
                 while count == 0:
                     C_mask = torch.zeros(C.shape).bernoulli_(0.5)
                     # 3 here refers to 3 dimensions in swiss roll
-                    if len(set([i.item() for i in torch.sum(C_mask, dim = 1)])) == 4 + 1:
-                        count = 1 
+                    if len(set([i.item() for i in torch.sum(C_mask, dim=1)])) == 4 + 1:
+                        count = 1
             else:
                 C_mask = torch.zeros(C.shape).bernoulli_(0)
 
@@ -71,7 +72,7 @@ class SwissRoll(Dataset):
             C = C.view([1, -1, 4*2])
 
             # Sum up
-            conds = C[:,:,4:].sum(2)
+            conds = C[:, :, 4:].sum(2)
             Batches_X = torch.cat([Batches_X, swiss_roll], 0)
             Batches_C = torch.cat([Batches_C, C], 0)
             Batches_conds = torch.cat([Batches_conds, conds], 0)
@@ -79,7 +80,7 @@ class SwissRoll(Dataset):
         self._batches_x = Batches_X
         self._batches_c = Batches_C
         self._batches_conds = Batches_conds
-    
+
     def __len__(self):
         return len(self._batches_x)
 

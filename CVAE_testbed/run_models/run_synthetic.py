@@ -125,7 +125,7 @@ def train(
         torch.empty([0]),
     )
     batch_length = 0
-    print('inside train', X_train.size(), C_train.size())
+    # print('inside train', X_train.size(), C_train.size())
 
     for j, i in enumerate(X_train):
         optimizer.zero_grad()
@@ -143,7 +143,7 @@ def train(
         rcl_loss += rcl.item()
         kld_loss += kld.item()
 
-        print(cond_labels)
+        # print(cond_labels)
         for jj, ii in enumerate(torch.unique(cond_labels)):
 
             this_cond_positions = cond_labels == ii

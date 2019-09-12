@@ -43,6 +43,7 @@ def per_condition_loss(d, c, conds, model, args, idx=1):
     else:
         return recon_batch, z_means, log_var
 
+
 def GreedyVisualizeEncoder(args, model, conds, c, d, kl_per_lt=None, kl_all_lt=None, selected_features=None, feature_names=None, first_features=None):
     """
     In this, we just take num_of_conds and run all combinations
@@ -93,7 +94,7 @@ def GreedyVisualizeEncoder(args, model, conds, c, d, kl_per_lt=None, kl_all_lt=N
         max_num_conds = c.size()[-1]
         # print(c.size()[-1], 'first')
         if len(conds) == c.size()[-1]:
-            recon_batch, z_means, log_var = per_condition_loss(d.clone(), c.clone(), conds.copy(), model, args, idx = 2)
+            recon_batch, z_means, log_var = per_condition_loss(d.clone(), c.clone(), conds.copy(), model, args, idx=2)
             kl_per_lt, kl_all_lt, selected_features = make_dataframe(kl_per_lt, kl_all_lt, selected_features, feature_names, z_means, c.clone(), recon_batch, log_var, conds.copy(), [], args)
 
         max_ELBO_diff = 0
@@ -104,7 +105,7 @@ def GreedyVisualizeEncoder(args, model, conds, c, d, kl_per_lt=None, kl_all_lt=N
             # print(i)
             this_conds = conds.copy()
             del this_conds[i]
-            print(this_conds)
+            # print(this_conds)
             if len(this_conds) == max_num_conds - 1:
                 # print('inside')
                 this_conditions_ELBO_plus_one, RCL_one_cond, KLD_one_cond = per_condition_loss(d.clone(), c.clone(), this_conds.copy(), model, args, idx=5)
@@ -125,8 +126,8 @@ def GreedyVisualizeEncoder(args, model, conds, c, d, kl_per_lt=None, kl_all_lt=N
                 max_ELBO_diff = ELBO_diff
                 most_important_cond = this_conds
                 popped_cond = conds[i]
-        print('after loop', most_important_cond, popped_cond)
-        recon_batch, z_means, log_var = per_condition_loss(d.clone(), c.clone(), most_important_cond.copy(), model, args, idx = 2)
+        # print('after loop', most_important_cond, popped_cond)
+        recon_batch, z_means, log_var = per_condition_loss(d.clone(), c.clone(), most_important_cond.copy(), model, args, idx=2)
         
         kl_per_lt, kl_all_lt, selected_features = make_dataframe(kl_per_lt, kl_all_lt, selected_features, feature_names, z_means, c.clone(), recon_batch, log_var, most_important_cond, popped_cond, args)
 

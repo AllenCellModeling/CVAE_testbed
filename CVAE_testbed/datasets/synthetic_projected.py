@@ -4,9 +4,21 @@ from torch.distributions import MultivariateNormal
 import numpy as np
 import sklearn
 from sklearn import preprocessing
+from scipy import stats
+
 
 class ProjectedSyntheticDataset(Dataset):
-    def __init__(self, num_batches, BATCH_SIZE, model_kwargs, shuffle=True, corr=False, train=True, P = None, mask=False):
+    def __init__(
+                self,
+                num_batches,
+                BATCH_SIZE,
+                model_kwargs,
+                shuffle=True,
+                corr=False,
+                train=True,
+                P=None,
+                mask=False
+                ):
         """
         Args: 
             num_batches: Number of batches of synthetic data
@@ -27,17 +39,17 @@ class ProjectedSyntheticDataset(Dataset):
         else:
             self._P = P
 
-        Batches_X, Batches_C, Batches_conds = torch.empty([0]) ,torch.empty([0]), torch.empty([0])
+        Batches_X, Batches_C, Batches_conds = torch.empty([0]), torch.empty([0]), torch.empty([0])
 
         for j, i in enumerate(range(self.num_batches)):
             if self.corr is False:
                 m = MultivariateNormal(torch.zeros(self.model_kwargs['x_dim']), torch.eye(self.model_kwargs['x_dim']))
             else:
                 if j == 0:
-                    corr_matrix = self.random_corr_mat(D = self.model_kwargs['x_dim'])
+                    corr_matrix = self.random_corr_mat(D=self.model_kwargs['x_dim'])
                     corr_matrix = torch.from_numpy(corr_matrix)
                 m = MultivariateNormal(torch.zeros(self.model_kwargs['x_dim']).float(), corr_matrix.float())
-        
+
             X = m.sample((self.BATCH_SIZE,))
             X = torch.cat([X, torch.zeros((self.BATCH_SIZE, self.model_kwargs['projection_dim'] - self.model_kwargs['x_dim']))], 1)
             X = X.t()
@@ -47,14 +59,16 @@ class ProjectedSyntheticDataset(Dataset):
             # X = torch.from_numpy(std_scaler.fit_transform(X.cpu().numpy())).cuda()
             # X = torch.from_numpy(sklearn.preprocessing.normalize(X.cpu().numpy(), axis=0)).cuda()
             X = X.t()
+
+            # TRY ZSCOREING
+            # X = torch.from_numpy(stats.zscore(X.cpu().numpy())).cuda()
+
             C = X.clone().cuda()
             count = 0
             if self.shuffle is True:
                 while count == 0:
                     C_mask = torch.zeros(C.shape).bernoulli_(0.5)
                     count = 1
-                    # if len(set([i.item() for i in torch.sum(C_mask, dim = 1)])) == self.model_kwargs['projection_dim'] + 1:
-                        # count = 1 
             else:
                 C_mask = torch.zeros(C.shape).bernoulli_(0)
 
@@ -73,7 +87,7 @@ class ProjectedSyntheticDataset(Dataset):
             C = C.view([1, -1, C.size()[-1]])
 
             # Sum up
-            conds = C[:,:,int(C.size()[-1]/2):].sum(2)
+            conds = C[:, :, int(C.size()[-1]/2):].sum(2)
 
             Batches_X = torch.cat([Batches_X.cuda(), X], 0)
             Batches_C = torch.cat([Batches_C.cuda(), C], 0)
@@ -82,7 +96,7 @@ class ProjectedSyntheticDataset(Dataset):
         self._batches_x = Batches_X
         self._batches_c = Batches_C
         self._batches_conds = Batches_conds
-    
+
     def __len__(self):
         return len(self._batches_x)
 
@@ -101,47 +115,49 @@ class ProjectedSyntheticDataset(Dataset):
             return self._batches_x, self._batches_c, self._batches_conds, self._P
         else:
             return self._batches_x, self._batches_c, self._batches_conds
-    
+
     def get_projection_matrix(self):
         return self._P
-    
+
+    def get_color(self):
+        return None
+
     def generate_projection_matrix(self):
         P = torch.zeros([self.model_kwargs['projection_dim'], self.model_kwargs['projection_dim']])
         col = 0
         for row in range(P.size()[0]):
             # col = torch.randint(0,self.model_kwargs['x_dim'],(1,)).item()
-            #P[row][col] = torch.randn(1).item()
-            P[row][col] = 1
+            # P[row][col] = torch.randn(1).item()
+            P[row][col] = 1 + torch.randn(1).item()/100
+            # P[row][col] = 1
             if col != self.model_kwargs['x_dim'] - 1:
                 col += 1
             else:
                 col = 0
             # P[row][col] = 1
-        print(P)
+        # print(P)
         return P
 
     def random_corr_mat(self, D=10, beta=1):
         """Generate random valid correlation matrix of dimension D.
         Smaller beta gives larger off diagonal correlations (beta > 0)."""
-    
+
         P = np.zeros([D, D])
         S = np.eye(D)
-    
+
         for k in range(0, D - 1):
             for i in range(k + 1, D):
                 P[k, i] = 2 * np.random.beta(beta, beta) - 1
                 p = P[k, i]
                 for l in reversed(range(k)):
                     p = (
-                        p * np.sqrt((1 - P[l, i] ** 2) * (1 - P[l, k] ** 2))
-                        + P[l, i] * P[l, k]
-                    )
+                        p * np.sqrt((1 - P[l, i] ** 2) * (1 - P[l, k] ** 2)) + P[l, i] * P[l, k]
+                        )
                 S[k, i] = S[i, k] = p
-    
+
         p = np.random.permutation(D)
         for i in range(D):
             S[:, i] = S[p, i]
         for i in range(D):
             S[i, :] = S[i, p]
         return S
-
