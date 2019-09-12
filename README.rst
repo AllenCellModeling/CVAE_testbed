@@ -71,7 +71,10 @@ This model takes a set of independent Gaussian distributions as an input. Specif
 
 Specifying 2 input dimensions gives
 
-[baseline_2](scripts/outputs/baseline_results/encoding_test_plots.png)
+.. image:: scripts/outputs/baseline_results/encoding_test_plots.png
+   :width: 750px
+   :scale: 100 %
+   :align: center
 
 This plot can be viewed in outputs/baseline_results. The first component is the train and test loss. The other 3 plots are encoding tests of the model in the presence of different sets of conditions. 0 (blue) implies that no conditions are provided, and thus the model uses 2 latent dimensions in order to encode the information. 1 (orange) implies that one condition is provided, meaning the model needs only 1 latent dimension to encode the information. Finally, 2 (green) means that both conditions are provided, implying that the model needs no dimensions to encode the information, i.e all the information about the input data has been provided via the condition. 
 
